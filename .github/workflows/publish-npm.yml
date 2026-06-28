@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   publish:
@@ -109,7 +110,6 @@ jobs:
 
       - name: Reject existing versions
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           RELEASE_PACKAGE: ${{ inputs.package }}
           RELEASE_VERSION: ${{ inputs.version }}
         shell: bash
@@ -122,7 +122,6 @@ jobs:
       - name: Verify framework package dependencies
         if: inputs.package == '@seclab-dev/vue' || inputs.package == '@seclab-dev/react'
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           RELEASE_PACKAGE: ${{ inputs.package }}
         shell: bash
         run: |
@@ -153,11 +152,24 @@ jobs:
             fi
           done < /tmp/vue-dependencies.txt
 
-      - name: Publish package
+      - name: Pack selected package
+        id: pack
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TAG: ${{ steps.release.outputs.tag }}
           RELEASE_PACKAGE: ${{ inputs.package }}
         shell: bash
         run: |
-          pnpm --filter "$RELEASE_PACKAGE" publish --no-git-checks --tag "$NPM_TAG" --access public --registry=https://registry.npmjs.org
+          PACK_DIR=$(mktemp -d)
+          pnpm --filter "$RELEASE_PACKAGE" pack --pack-destination "$PACK_DIR"
+          PACKAGE_FILE=$(find "$PACK_DIR" -maxdepth 1 -name "*.tgz" -print -quit)
+          if [ -z "$PACKAGE_FILE" ]; then
+            echo "No package archive was created"
+            exit 1
+          fi
+          echo "file=$PACKAGE_FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Publish package
+        env:
+          NPM_TAG: ${{ steps.release.outputs.tag }}
+        shell: bash
+        run: |
+          npm publish "${{ steps.pack.outputs.file }}" --tag "$NPM_TAG" --access public --provenance --registry=https://registry.npmjs.org
