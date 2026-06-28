@@ -1,0 +1,60 @@
+.sl-tooltip-wrapper {
+  display: inline-block;
+}
+
+.sl-tooltip-content {
+  z-index: var(--sdl-z-index-modal); /* 使用规范的 Z-Index */
+  position: absolute;
+  background-color: var(--sdl-bg-panel);
+  color: var(--sdl-text-primary);
+  padding: var(--sdl-space-1) var(--sdl-space-3);
+  border-radius: var(--sdl-radius-sm);
+  font-size: var(--sdl-font-caption);
+  white-space: nowrap;
+  box-shadow: var(--sdl-shadow-panel);
+  border: 1px solid var(--sdl-border-strong);
+  pointer-events: none;
+  line-height: 1.6;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.sl-tooltip-content.is-visible {
+  opacity: 1;
+}
+
+.sl-tooltip-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-width: 5px;
+  border-style: solid;
+}
+
+.sl-tooltip-arrow[data-position="top"] {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-color: var(--sdl-border-strong) transparent transparent transparent;
+}
+
+.sl-tooltip-arrow[data-position="bottom"] {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-color: transparent transparent var(--sdl-border-strong) transparent;
+}
+
+.sl-tooltip-arrow[data-position="left"] {
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  border-color: transparent transparent transparent var(--sdl-border-strong);
+}
+
+.sl-tooltip-arrow[data-position="right"] {
+  top: 50%;
+  right: 100%;
+  transform: translateY(-50%);
+  border-color: transparent var(--sdl-border-strong) transparent transparent;
+}

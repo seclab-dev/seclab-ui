@@ -1,0 +1,8 @@
+.sl-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  font-size: var(--sdl-font-body-sm);
+  color: var(--sdl-text-muted);
+}

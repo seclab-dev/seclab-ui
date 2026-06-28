@@ -1,0 +1,164 @@
+name: Publish Packages
+
+run-name: "${{ inputs.package }} Version ${{ inputs.version }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package to publish
+        required: true
+        default: "@seclab-dev/vue"
+        type: choice
+        options:
+          - "@seclab-dev/tokens"
+          - "@seclab-dev/icons"
+          - "@seclab-dev/suite-sdk"
+          - "@seclab-dev/vue"
+          - "@seclab-dev/react"
+      version:
+        description: Expected package SemVer
+        required: true
+        default: 0.1.0-alpha.1
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: "@seclab-dev"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify selected package version
+        env:
+          RELEASE_PACKAGE: ${{ inputs.package }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        shell: bash
+        run: |
+          ACTUAL_VERSION=$(node -e "
+            const fs = require('node:fs')
+            const paths = {
+              '@seclab-dev/tokens': 'packages/tokens/package.json',
+              '@seclab-dev/icons': 'packages/icons/package.json',
+              '@seclab-dev/suite-sdk': 'packages/suite-sdk/package.json',
+              '@seclab-dev/vue': 'packages/vue/package.json',
+              '@seclab-dev/react': 'packages/react/package.json'
+            }
+            const manifest = JSON.parse(fs.readFileSync(paths[process.env.RELEASE_PACKAGE], 'utf8'))
+            process.stdout.write(manifest.version)
+          ")
+          if [ "$ACTUAL_VERSION" != "$RELEASE_VERSION" ]; then
+            echo "$RELEASE_PACKAGE version is $ACTUAL_VERSION, expected $RELEASE_VERSION"
+            exit 1
+          fi
+
+      - name: Build framework package dependencies
+        if: inputs.package == '@seclab-dev/vue' || inputs.package == '@seclab-dev/react'
+        run: |
+          pnpm --filter @seclab-dev/tokens build
+          pnpm --filter @seclab-dev/icons build
+
+      - name: Type-check selected package
+        env:
+          RELEASE_PACKAGE: ${{ inputs.package }}
+        run: pnpm --filter "$RELEASE_PACKAGE" type-check
+
+      - name: Build selected package
+        env:
+          RELEASE_PACKAGE: ${{ inputs.package }}
+        run: pnpm --filter "$RELEASE_PACKAGE" build
+
+      - name: Check selected package archive
+        run: node scripts/check-packages.mjs "${{ inputs.package }}"
+
+      - name: Resolve npm dist-tag
+        id: release
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        shell: bash
+        run: |
+          TAG=$(node --input-type=module -e "
+            import semver from 'semver'
+            const prerelease = semver.prerelease(process.env.RELEASE_VERSION)
+            const prefix = prerelease?.[0]
+            const tag = typeof prefix === 'string' && /^[a-z][a-z0-9-]*$/i.test(prefix)
+              ? prefix
+              : prerelease
+                ? 'next'
+                : 'latest'
+            process.stdout.write(tag)
+          ")
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Reject existing versions
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_PACKAGE: ${{ inputs.package }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        shell: bash
+        run: |
+          if npm view "$RELEASE_PACKAGE@$RELEASE_VERSION" version --registry=https://npm.pkg.github.com >/dev/null 2>&1; then
+            echo "$RELEASE_PACKAGE@$RELEASE_VERSION already exists"
+            exit 1
+          fi
+
+      - name: Verify framework package dependencies
+        if: inputs.package == '@seclab-dev/vue' || inputs.package == '@seclab-dev/react'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_PACKAGE: ${{ inputs.package }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE' > /tmp/vue-dependencies.txt
+          import { readFileSync } from 'node:fs'
+
+          const packageDirectories = {
+            '@seclab-dev/vue': 'packages/vue/package.json',
+            '@seclab-dev/react': 'packages/react/package.json'
+          }
+          const dependencyDirectories = {
+            '@seclab-dev/icons': 'packages/icons/package.json',
+            '@seclab-dev/tokens': 'packages/tokens/package.json'
+          }
+          const manifest = JSON.parse(readFileSync(packageDirectories[process.env.RELEASE_PACKAGE], 'utf8'))
+          for (const name of ['@seclab-dev/icons', '@seclab-dev/tokens']) {
+            const declaredVersion = manifest.dependencies[name]
+            const dependencyVersion = declaredVersion?.startsWith('workspace:')
+              ? JSON.parse(readFileSync(dependencyDirectories[name], 'utf8')).version
+              : declaredVersion
+            console.log(`${name}@${dependencyVersion}`)
+          }
+          NODE
+          while read -r dependency; do
+            if ! npm view "$dependency" version --registry=https://npm.pkg.github.com >/dev/null 2>&1; then
+              echo "Required dependency is not published: $dependency"
+              exit 1
+            fi
+          done < /tmp/vue-dependencies.txt
+
+      - name: Publish package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_PACKAGE: ${{ inputs.package }}
+        shell: bash
+        run: |
+          pnpm --filter "$RELEASE_PACKAGE" publish --no-git-checks --access public --tag "$NPM_TAG"

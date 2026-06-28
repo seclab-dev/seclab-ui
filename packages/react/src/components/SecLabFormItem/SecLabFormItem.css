@@ -1,0 +1,31 @@
+.sl-form-item {
+  margin-bottom: var(--sdl-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sdl-space-2);
+}
+
+.sl-form-item-label {
+  font-size: var(--sdl-font-body-sm);
+  font-weight: 600;
+  color: var(--sdl-text-secondary);
+  line-height: 1.4;
+  user-select: none;
+}
+
+.sl-form-item-required {
+  color: var(--sdl-danger);
+  margin-right: 4px;
+}
+
+.sl-form-item-content {
+  position: relative;
+  width: 100%;
+}
+
+.sl-form-item-hint {
+  margin-top: var(--sdl-space-1);
+  font-size: var(--sdl-font-caption);
+  color: var(--sdl-text-muted);
+  line-height: 1.4;
+}

@@ -1,0 +1,73 @@
+.sl-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--sdl-bg-backdrop);
+  display: flex;
+  justify-content: flex-end;
+  z-index: var(--sdl-z-index-modal);
+}
+
+.sl-drawer-panel {
+  height: 100%;
+  background: var(--sdl-bg-panel);
+  box-shadow: var(--sdl-shadow-panel);
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--sdl-border-strong);
+  animation: sl-drawer-slide-in 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.sl-drawer-header {
+  padding: var(--sdl-space-4) var(--sdl-space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--sdl-border-subtle);
+  background: var(--sdl-bg-muted);
+}
+
+.sl-drawer-title {
+  margin: 0;
+  font-size: var(--sdl-font-subtitle);
+  font-weight: 600;
+  color: var(--sdl-text-primary);
+}
+
+.sl-drawer-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--sdl-text-muted);
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.sl-drawer-close-btn:hover {
+  color: var(--sdl-text-primary);
+}
+
+.sl-drawer-body {
+  padding: var(--sdl-space-5);
+  flex: 1;
+  overflow-y: auto;
+  color: var(--sdl-text-primary);
+}
+
+.sl-drawer-footer {
+  padding: var(--sdl-space-4) var(--sdl-space-5);
+  border-top: 1px solid var(--sdl-border-subtle);
+  background: var(--sdl-bg-muted);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sdl-space-3);
+}
+
+@keyframes sl-drawer-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

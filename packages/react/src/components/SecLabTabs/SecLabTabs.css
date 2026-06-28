@@ -1,0 +1,50 @@
+.sl-tabs {
+  width: 100%;
+}
+
+.sl-tabs-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sdl-space-6);
+  border-bottom: 1px solid var(--sdl-border-subtle);
+  padding: 0 var(--sdl-space-1);
+}
+
+.sl-tabs-item {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--sdl-font-body);
+  color: var(--sdl-text-secondary);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.sl-tabs-item:hover:not(.is-disabled) {
+  color: var(--sdl-text-primary);
+}
+
+.sl-tabs-item.is-active {
+  color: var(--sdl-primary);
+  font-weight: 600;
+}
+
+.sl-tabs-item.is-active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--sdl-primary);
+  border-radius: var(--sdl-radius-pill) var(--sdl-radius-pill) 0 0;
+}
+
+.sl-tabs-item.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}

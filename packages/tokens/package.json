@@ -1,0 +1,30 @@
+{
+  "name": "@seclab-dev/tokens",
+  "version": "0.1.0-alpha.1",
+  "description": "SecLab Design Language Theme CSS Tokens",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.css",
+  "style": "./dist/index.css",
+  "exports": {
+    ".": "./dist/index.css",
+    "./index.css": "./dist/index.css"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "node ../../scripts/build-tokens.mjs",
+    "type-check": "node -e \"process.exit(0)\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seclab-dev/seclab-ui.git",
+    "directory": "packages/tokens"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  }
+}

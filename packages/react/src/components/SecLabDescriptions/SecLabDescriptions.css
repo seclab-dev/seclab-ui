@@ -1,0 +1,58 @@
+.sl-descriptions {
+  width: 100%;
+  font-family: var(--sdl-font-family);
+}
+
+.sl-descriptions-title {
+  margin-bottom: var(--sdl-space-3);
+  font-size: var(--sdl-font-subtitle);
+  font-weight: 600;
+  color: var(--sdl-text-primary);
+}
+
+.sl-descriptions-grid {
+  display: grid;
+  gap: 0;
+  width: 100%;
+}
+
+.sl-descriptions-item {
+  display: flex;
+  min-height: 40px;
+  border-bottom: 1px solid var(--sdl-border-subtle);
+}
+
+.sl-descriptions-label {
+  width: 140px;
+  padding: var(--sdl-space-2) var(--sdl-space-4);
+  background-color: var(--sdl-bg-muted);
+  color: var(--sdl-text-secondary);
+  font-size: var(--sdl-font-body-sm);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sl-descriptions-content {
+  flex: 1;
+  padding: var(--sdl-space-2) var(--sdl-space-4);
+  color: var(--sdl-text-primary);
+  font-size: var(--sdl-font-body-sm);
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  word-break: break-all;
+}
+
+/* 边框模式 */
+.sl-descriptions.is-border {
+  border: 1px solid var(--sdl-border-default);
+  border-bottom: none;
+  border-radius: var(--sdl-radius-md);
+  overflow: hidden;
+}
+
+.sl-descriptions.is-border .sl-descriptions-label {
+  border-right: 1px solid var(--sdl-border-subtle);
+}

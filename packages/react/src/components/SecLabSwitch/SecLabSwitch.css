@@ -1,0 +1,52 @@
+.sl-switch {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  gap: var(--sdl-space-2);
+}
+
+.sl-switch.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.sl-switch-track {
+  position: relative;
+  width: 40px;
+  height: 20px;
+  background-color: var(--sdl-bg-muted);
+  border: 1px solid var(--sdl-border-default);
+  border-radius: var(--sdl-radius-pill);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sl-switch.is-active .sl-switch-track {
+  background-color: var(--sdl-primary);
+  border-color: var(--sdl-primary);
+}
+
+.sl-switch-handle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background-color: var(--sdl-text-primary);
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sl-switch.is-active .sl-switch-handle {
+  transform: translateX(20px);
+  background-color: var(--sdl-text-inverse);
+}
+
+.sl-switch-label {
+  font-size: var(--sdl-font-body-sm);
+  color: var(--sdl-text-secondary);
+}
+
+.sl-switch.is-active .sl-switch-label {
+  color: var(--sdl-text-primary);
+}

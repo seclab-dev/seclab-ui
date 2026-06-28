@@ -1,0 +1,92 @@
+.sl-select {
+  position: relative;
+  width: 100%;
+  font-size: var(--sdl-font-body);
+}
+
+.sl-select-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--sdl-space-3);
+  height: 36px;
+  border: 1px solid var(--sdl-border-default);
+  border-radius: var(--sdl-radius-md);
+  background-color: var(--sdl-bg-input);
+  color: var(--sdl-text-primary);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
+}
+
+.sl-select.is-disabled .sl-select-trigger {
+  background-color: var(--sdl-bg-muted);
+  cursor: not-allowed;
+  color: var(--sdl-text-subtle);
+  border-color: var(--sdl-border-subtle);
+}
+
+.sl-select:not(.is-disabled) .sl-select-trigger:hover {
+  border-color: var(--sdl-border-strong);
+}
+
+.sl-select.is-open .sl-select-trigger {
+  border-color: var(--sdl-primary);
+  box-shadow: var(--sdl-focus-ring);
+}
+
+.sl-select-arrow {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--sdl-text-muted);
+  transition: transform 0.2s ease;
+}
+
+.sl-select.is-open .sl-select-arrow {
+  transform: rotate(180deg);
+}
+
+.sl-select-options {
+  position: absolute;
+  background-color: var(--sdl-bg-panel);
+  border: 1px solid var(--sdl-border-strong);
+  border-radius: var(--sdl-radius-md);
+  box-shadow: var(--sdl-shadow-panel);
+  max-height: 260px;
+  width: max-content;
+  overflow-y: auto;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  list-style: none;
+  padding: var(--sdl-space-1);
+  margin: 0;
+  z-index: calc(var(--sdl-z-index-modal) + 1);
+}
+
+.sl-select-option {
+  padding: var(--sdl-space-2) var(--sdl-space-3);
+  border-radius: var(--sdl-radius-sm);
+  cursor: pointer;
+  color: var(--sdl-text-secondary);
+  transition: all 0.2s;
+  font-size: var(--sdl-font-body-sm);
+  white-space: nowrap;
+}
+
+.sl-select-option:hover {
+  background-color: var(--sdl-bg-hover);
+  color: var(--sdl-text-primary);
+}
+
+.sl-select-option.selected {
+  background-color: var(--sdl-bg-active);
+  color: var(--sdl-primary);
+  font-weight: 600;
+}
+
+.sl-select-option.disabled {
+  color: var(--sdl-text-subtle);
+  cursor: not-allowed;
+}

@@ -1,0 +1,87 @@
+import React from "react";
+import { createPortal } from "react-dom";
+import "./SecLabDrawer.css";
+
+export interface SecLabDrawerProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** 抽屉是否显示 */
+  visible: boolean;
+  /** 抽屉标题 */
+  title?: string;
+  /** 自定义宽度，支持 px 或百分比，默认值为 420px */
+  width?: string;
+  /** 点击遮罩层是否允许自动关闭抽屉，默认为 true */
+  closeOnOverlay?: boolean;
+  /** 关闭回调 */
+  onClose?: () => void;
+  /** 底部操作按钮栏 */
+  footer?: React.ReactNode;
+  /** 抽屉主体内容 */
+  children?: React.ReactNode;
+}
+
+export const SecLabDrawer: React.FC<SecLabDrawerProps> = ({
+  visible,
+  title = "",
+  width = "420px",
+  closeOnOverlay = true,
+  onClose,
+  footer,
+  className = "",
+  style,
+  children,
+  ...rest
+}) => {
+  if (!visible) return null;
+
+  const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (closeOnOverlay && event.target === event.currentTarget) {
+      onClose?.();
+    }
+  };
+
+  const drawerStyle: React.CSSProperties = {
+    width,
+    ...style,
+  };
+
+  return createPortal(
+    <div
+      className={`sl-drawer-overlay ${className}`.trim()}
+      onClick={handleOverlayClick}
+      role="presentation"
+      {...rest}
+    >
+      <div
+        className="sl-drawer-panel"
+        style={drawerStyle}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title || undefined}
+      >
+        {/* 头部标题栏 */}
+        <div className="sl-drawer-header" data-slot="header">
+          <h3 className="sl-drawer-title">{title}</h3>
+          <button
+            type="button"
+            className="sl-drawer-close-btn"
+            onClick={onClose}
+            aria-label="Close drawer"
+          >
+            &times;
+          </button>
+        </div>
+
+        {/* 主体内容区 */}
+        <div className="sl-drawer-body">{children}</div>
+
+        {/* 底部操作按钮栏 */}
+        {footer && (
+          <div className="sl-drawer-footer" data-slot="footer">
+            {footer}
+          </div>
+        )}
+      </div>
+    </div>,
+    document.body,
+  );
+};

@@ -1,0 +1,89 @@
+.sl-action-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.sl-action-btn {
+  background-color: var(--sdl-bg-muted);
+  color: var(--sdl-text-primary);
+  padding: 0 var(--sdl-space-3);
+  height: 32px;
+  border: 1px solid var(--sdl-border-default);
+  border-radius: var(--sdl-radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: var(--sdl-font-body-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--sdl-space-2);
+}
+
+.sl-action-btn:hover {
+  background-color: var(--sdl-bg-hover);
+  border-color: var(--sdl-border-brand);
+}
+
+.sl-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sl-dropdown {
+  position: absolute;
+  background-color: var(--sdl-bg-panel);
+  border: 1px solid var(--sdl-border-strong);
+  border-radius: var(--sdl-radius-md);
+  box-shadow: var(--sdl-shadow-panel);
+  z-index: var(--sdl-z-index-popover);
+  min-width: 140px;
+  padding: var(--sdl-space-1);
+  overflow: hidden;
+}
+
+.sl-dropdown-tooltip-wrapper {
+  display: block;
+  width: 100%;
+}
+
+.sl-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sdl-space-2);
+  width: 100%;
+  padding: var(--sdl-space-2) var(--sdl-space-3);
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: var(--sdl-font-body-sm);
+  color: var(--sdl-text-secondary);
+  transition: all 0.2s;
+  border-radius: var(--sdl-radius-sm);
+}
+
+.sl-dropdown-item:hover:not(:disabled) {
+  background-color: var(--sdl-bg-hover);
+  color: var(--sdl-text-primary);
+}
+
+.sl-dropdown-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sl-dropdown-icon {
+  width: 20px;
+  opacity: 0.8;
+}
+
+/* 业务语义颜色扩展 */
+.sl-dropdown-item.app-btn-start {
+  color: var(--sdl-primary);
+}
+.sl-dropdown-item.app-btn-stop {
+  color: var(--sdl-warning);
+}
+.sl-dropdown-item.app-btn-delete {
+  color: var(--sdl-danger);
+}

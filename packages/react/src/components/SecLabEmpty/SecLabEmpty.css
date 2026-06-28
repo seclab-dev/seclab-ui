@@ -1,0 +1,26 @@
+.sl-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sdl-space-8) var(--sdl-space-4);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.sl-empty-icon {
+  color: var(--sdl-text-muted);
+  margin-bottom: var(--sdl-space-4);
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.sl-empty-description {
+  margin: 0;
+  font-size: var(--sdl-font-body);
+  color: var(--sdl-text-muted);
+}
+
+.sl-empty-extra {
+  margin-top: var(--sdl-space-4);
+}

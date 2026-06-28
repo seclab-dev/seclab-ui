@@ -1,0 +1,86 @@
+.sl-alert {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  padding: var(--sdl-space-2) var(--sdl-space-4);
+  border-radius: var(--sdl-radius-md);
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  margin-bottom: var(--sdl-space-3);
+  font-family: var(--sdl-font-family);
+}
+
+.sl-alert-icon {
+  margin-right: var(--sdl-space-3);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.sl-alert-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.sl-alert-title {
+  margin: 0;
+  font-size: var(--sdl-font-body);
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.sl-alert-description {
+  font-size: var(--sdl-font-body-sm);
+  line-height: 1.6;
+}
+
+.sl-alert-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  margin-left: var(--sdl-space-3);
+  line-height: 1;
+  transition: opacity 0.2s;
+}
+
+.sl-alert-close:hover {
+  opacity: 1;
+}
+
+/* --- 类型预设 (SDL 软色调) --- */
+.is-info {
+  background-color: var(--sdl-info-soft);
+  color: var(--sdl-info);
+  border-color: rgba(0, 200, 255, 0.2);
+}
+
+.is-success {
+  background-color: var(--sdl-success-soft);
+  color: var(--sdl-success);
+  border-color: rgba(0, 210, 122, 0.2);
+}
+
+.is-warning {
+  background-color: var(--sdl-warning-soft);
+  color: var(--sdl-warning);
+  border-color: rgba(255, 181, 71, 0.2);
+}
+
+.is-error {
+  background-color: var(--sdl-danger-soft);
+  color: var(--sdl-danger);
+  border-color: rgba(255, 94, 122, 0.2);
+}
+
+/* 动画 */
+.sl-alert-fade-enter-active,
+.sl-alert-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.sl-alert-fade-enter-from,
+.sl-alert-fade-leave-to {
+  opacity: 0;
+}

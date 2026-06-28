@@ -1,0 +1,135 @@
+.sl-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+  outline: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  vertical-align: middle;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: var(--sdl-font-family);
+}
+
+.sl-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* 尺寸预设 */
+.sl-button--default {
+  height: 32px;
+  padding: 0 var(--sdl-space-3);
+  font-size: var(--sdl-font-body-sm);
+  border-radius: var(--sdl-radius-md);
+}
+
+.sl-button--small {
+  height: 24px;
+  padding: 0 var(--sdl-space-2);
+  font-size: var(--sdl-font-caption);
+  border-radius: var(--sdl-radius-sm);
+}
+
+.sl-button--large {
+  height: 40px;
+  padding: 0 var(--sdl-space-5);
+  font-size: var(--sdl-font-body);
+  border-radius: var(--sdl-radius-md);
+}
+
+/* 类型预设 */
+.sl-button--primary {
+  background-color: var(--sdl-primary);
+  border-color: var(--sdl-primary);
+  color: var(--sdl-text-inverse);
+}
+.sl-button--primary:not(:disabled):hover {
+  background-color: var(--sdl-primary-hover);
+  border-color: var(--sdl-primary-hover);
+  box-shadow: 0 4px 12px rgba(0, 200, 255, 0.25);
+}
+.sl-button--primary:not(:disabled):active {
+  background-color: var(--sdl-primary-active);
+  border-color: var(--sdl-primary-active);
+}
+
+.sl-button--secondary {
+  background-color: var(--sdl-bg-muted);
+  border-color: var(--sdl-border-default);
+  color: var(--sdl-text-secondary);
+}
+.sl-button--secondary:not(:disabled):hover {
+  background-color: var(--sdl-bg-hover);
+  border-color: var(--sdl-border-brand);
+  color: var(--sdl-text-primary);
+}
+
+.sl-button--danger {
+  background-color: var(--sdl-danger);
+  border-color: var(--sdl-danger);
+  color: var(--sdl-text-on-danger);
+}
+.sl-button--danger:not(:disabled):hover {
+  opacity: 0.9;
+  filter: brightness(1.1);
+}
+
+.sl-button--warning {
+  background-color: var(--sdl-warning);
+  border-color: var(--sdl-warning);
+  color: var(--sdl-text-inverse);
+}
+
+.sl-button--info {
+  background-color: rgba(145, 162, 184, 0.1);
+  border-color: rgba(145, 162, 184, 0.2);
+  color: var(--sdl-text-muted);
+}
+.sl-button--info:not(:disabled):hover {
+  background-color: rgba(145, 162, 184, 0.2);
+  color: var(--sdl-text-secondary);
+}
+
+/* 加载动画 */
+.sl-button-loading-icon {
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.sl-button-loading-icon .sl-spinner {
+  animation: rotate 2s linear infinite;
+  width: 14px;
+  height: 14px;
+}
+
+.sl-button-loading-icon .sl-spinner .path {
+  stroke: currentColor;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "playground-react",
+  "private": true,
+  "version": "0.1.0-alpha.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@seclab-dev/tokens": "workspace:*",
+    "@seclab-dev/icons": "workspace:*",
+    "@seclab-dev/react": "workspace:*",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.2"
+  }
+}

@@ -1,0 +1,82 @@
+.sl-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 12, 24, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.sl-dialog-card {
+  background-color: var(--sdl-bg-panel);
+  border-radius: var(--sdl-radius-lg);
+  border: 1px solid var(--sdl-border-strong);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 85%;
+  animation: sl-dialog-pop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.sl-dialog-header {
+  padding: var(--sdl-space-4) var(--sdl-space-4);
+  background-color: var(--sdl-bg-muted);
+  border-bottom: 1px solid var(--sdl-border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sl-dialog-title {
+  font-size: var(--sdl-font-subtitle);
+  font-weight: 700;
+  color: var(--sdl-text-primary);
+  user-select: none;
+}
+
+.sl-dialog-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--sdl-text-muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 var(--sdl-space-1);
+  transition: color 0.15s ease;
+}
+
+.sl-dialog-close-btn:hover {
+  color: var(--sdl-text-primary);
+}
+
+.sl-dialog-body {
+  padding: var(--sdl-space-4);
+  overflow-y: auto;
+  flex: 1;
+  color: var(--sdl-text-secondary);
+}
+
+.sl-dialog-footer {
+  padding: var(--sdl-space-4) var(--sdl-space-4);
+  background-color: var(--sdl-bg-muted);
+  border-top: 1px solid var(--sdl-border-subtle);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sdl-space-3);
+  flex-shrink: 0;
+}
+
+@keyframes sl-dialog-pop {
+  from {
+    transform: scale(0.96) translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}

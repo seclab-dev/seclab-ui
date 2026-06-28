@@ -1,0 +1,23 @@
+.sl-breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.sl-breadcrumb-item:last-child .sl-breadcrumb-separator {
+  display: none;
+}
+
+.sl-breadcrumb-label {
+  color: var(--sdl-text-secondary);
+  transition: color 0.2s;
+}
+
+.sl-breadcrumb-label:hover {
+  color: var(--sdl-primary);
+}
+
+.sl-breadcrumb-separator {
+  margin: 0 var(--sdl-space-2);
+  color: var(--sdl-text-muted);
+  user-select: none;
+}
