@@ -31,7 +31,15 @@ export interface SecLabSelectProps extends Omit<
   onChange?: (value: string | number | null) => void;
   /** 禁用选项被点击时的回调 */
   onOptionDisabled?: (option: SecLabSelectOption) => void;
+  /** 下拉列表滚动时的回调 */
+  onDropdownScroll?: (event: React.UIEvent<HTMLUListElement>) => void;
+  /** 下拉列表滚动到底部附近时的回调 */
+  onDropdownReachBottom?: (event: React.UIEvent<HTMLUListElement>) => void;
+  /** 下拉列表底部内容 */
+  dropdownFooter?: React.ReactNode;
 }
+
+const SCROLL_BOTTOM_THRESHOLD = 24;
 
 export const SecLabSelect: React.FC<SecLabSelectProps> = ({
   value,
@@ -40,6 +48,9 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
   disabled = false,
   onChange,
   onOptionDisabled,
+  onDropdownScroll,
+  onDropdownReachBottom,
+  dropdownFooter,
   className = "",
   ...rest
 }) => {
@@ -105,6 +116,17 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
     setIsOpen(false);
   };
 
+  const handleDropdownScroll = (event: React.UIEvent<HTMLUListElement>) => {
+    onDropdownScroll?.(event);
+
+    const target = event.currentTarget;
+    const distanceToBottom =
+      target.scrollHeight - target.scrollTop - target.clientHeight;
+    if (distanceToBottom <= SCROLL_BOTTOM_THRESHOLD) {
+      onDropdownReachBottom?.(event);
+    }
+  };
+
   return (
     <div
       className={`sl-select ${isOpen ? "is-open" : ""} ${disabled ? "is-disabled" : ""} ${className}`.trim()}
@@ -118,7 +140,11 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
 
       {isOpen &&
         createPortal(
-          <ul className="sl-select-options" style={dropdownStyle}>
+          <ul
+            className="sl-select-options"
+            style={dropdownStyle}
+            onScroll={handleDropdownScroll}
+          >
             {options.map((option) => {
               const isSelected = value === option.value;
               return (
@@ -132,6 +158,9 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
                 </li>
               );
             })}
+            {dropdownFooter ? (
+              <li className="sl-select-footer">{dropdownFooter}</li>
+            ) : null}
           </ul>,
           document.body,
         )}

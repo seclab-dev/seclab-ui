@@ -90,3 +90,10 @@
   color: var(--sdl-text-subtle);
   cursor: not-allowed;
 }
+
+.sl-select-footer {
+  padding: var(--sdl-space-2) var(--sdl-space-3);
+  color: var(--sdl-text-subtle);
+  font-size: var(--sdl-font-body-sm);
+  list-style: none;
+}

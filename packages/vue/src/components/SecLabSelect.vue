@@ -27,8 +27,11 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "update:modelValue", value: string | number | null): void;
   (e: "option-disabled", option: Option): void;
+  (e: "dropdown-scroll", event: Event): void;
+  (e: "dropdown-reach-bottom", event: Event): void;
 }>();
 
+const SCROLL_BOTTOM_THRESHOLD = 24;
 const isOpen = ref(false);
 const selectRef = ref<HTMLElement | null>(null);
 const dropdownStyle = ref({});
@@ -73,6 +76,19 @@ function selectOption(option: Option) {
   isOpen.value = false;
 }
 
+function handleDropdownScroll(event: Event) {
+  emit("dropdown-scroll", event);
+
+  const target = event.currentTarget as HTMLElement | null;
+  if (!target) return;
+
+  const distanceToBottom =
+    target.scrollHeight - target.scrollTop - target.clientHeight;
+  if (distanceToBottom <= SCROLL_BOTTOM_THRESHOLD) {
+    emit("dropdown-reach-bottom", event);
+  }
+}
+
 function handleClickOutside(event: MouseEvent) {
   if (selectRef.value && !selectRef.value.contains(event.target as Node)) {
     isOpen.value = false;
@@ -104,7 +120,12 @@ onUnmounted(() => {
     </div>
     <teleport to="body">
       <Transition name="sl-select-fade">
-        <ul v-if="isOpen" class="sl-select-options" :style="dropdownStyle">
+        <ul
+          v-if="isOpen"
+          class="sl-select-options"
+          :style="dropdownStyle"
+          @scroll="handleDropdownScroll"
+        >
           <li
             v-for="option in options"
             :key="option.value"
@@ -117,6 +138,9 @@ onUnmounted(() => {
             @click="selectOption(option)"
           >
             {{ option.label }}
+          </li>
+          <li v-if="$slots['dropdown-footer']" class="sl-select-footer">
+            <slot name="dropdown-footer" />
           </li>
         </ul>
       </Transition>
@@ -216,6 +240,13 @@ onUnmounted(() => {
 .sl-select-option.disabled {
   color: var(--sdl-text-subtle);
   cursor: not-allowed;
+}
+
+.sl-select-footer {
+  padding: var(--sdl-space-2) var(--sdl-space-3);
+  color: var(--sdl-text-subtle);
+  font-size: var(--sdl-font-body-sm);
+  list-style: none;
 }
 
 .sl-select-fade-enter-active,
