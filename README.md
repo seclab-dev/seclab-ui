@@ -4,21 +4,21 @@
 
 ## 包结构
 
-| 包 | 说明 |
-| --- | --- |
-| `@seclab-dev/tokens` | SDL 主题变量、颜色、间距、圆角、阴影和层级。 |
-| `@seclab-dev/icons` | SVG 图标、命名空间图标表和兜底图标。 |
-| `@seclab-dev/vue` | Vue 3 基础组件库。 |
-| `@seclab-dev/react` | React 19 基础组件库。 |
-| `@seclab-dev/suite-sdk` | 套件 iframe 与主控通信 SDK。 |
+| 包                      | 说明                                         |
+| ----------------------- | -------------------------------------------- |
+| `@seclab-dev/tokens`    | SDL 主题变量、颜色、间距、圆角、阴影和层级。 |
+| `@seclab-dev/icons`     | SVG 图标、命名空间图标表和兜底图标。         |
+| `@seclab-dev/vue`       | Vue 3 基础组件库。                           |
+| `@seclab-dev/react`     | React 19 基础组件库。                        |
+| `@seclab-dev/suite-sdk` | 套件 iframe 与主控通信 SDK。                 |
 
 辅助项目：
 
-| 目录 | 说明 |
-| --- | --- |
-| `playground/` | Vue 组件预览。 |
-| `playground-react/` | React 组件预览。 |
-| `scripts/` | 包检查和发布辅助脚本。 |
+| 目录                | 说明                   |
+| ------------------- | ---------------------- |
+| `playground/`       | Vue 组件预览。         |
+| `playground-react/` | React 组件预览。       |
+| `scripts/`          | 包检查和发布辅助脚本。 |
 
 ## 开发命令
 
