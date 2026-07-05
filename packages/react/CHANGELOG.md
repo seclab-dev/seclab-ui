@@ -2,6 +2,13 @@
 
 格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，并遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [0.1.0-alpha.2] - 2026-07-05
+
+### Added
+
+- `SecLabSelect` 支持下拉列表滚动回调和接近底部回调，便于实现滚动分页加载。
+- `SecLabSelect` 支持 `dropdownFooter` 属性，可在下拉列表底部展示加载状态等自定义内容。
+
 ## [0.1.0-alpha.1] - 2026-06-28
 
 ### Added
