@@ -14,6 +14,7 @@ import type {
   SuiteLocaleState,
   SuiteLocaleSubscriber,
   SuiteMessageHandler,
+  SuiteNavigationPayload,
   SuiteNotificationPayload,
   SuiteReadyPayload,
   SuiteThemePayload,
@@ -93,6 +94,18 @@ export function createSuiteBridge(
 
     postMessage<SuiteNotificationPayload>(
       SUITE_MESSAGE_TYPES.suiteNotificationShow,
+      payload,
+    );
+    return true;
+  };
+
+  const navigate = (payload: SuiteNavigationPayload) => {
+    if (!capabilities.includes("navigation") || !canPostToHost()) {
+      return false;
+    }
+
+    postMessage<SuiteNavigationPayload>(
+      SUITE_MESSAGE_TYPES.suiteNavigationOpen,
       payload,
     );
     return true;
@@ -192,6 +205,7 @@ export function createSuiteBridge(
       });
     },
     notify,
+    navigate,
     requestWindowFocus,
     postMessage,
     onMessage(type, handler) {

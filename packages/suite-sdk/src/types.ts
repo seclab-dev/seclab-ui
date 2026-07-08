@@ -116,6 +116,7 @@ export interface SuiteConfirmDialogPayload {
 export interface SuiteNavigationPayload {
   target: "app" | "url" | "suite-center" | "desktop";
   value?: string;
+  payload?: Record<string, unknown>;
   external?: boolean;
 }
 
@@ -167,6 +168,10 @@ export interface SuiteBridge {
    * 请求主控展示统一通知；独立运行或主控不可用时返回 false，套件应使用本地通知降级。
    */
   notify: (payload: SuiteNotificationPayload) => boolean;
+  /**
+   * 请求主控执行导航动作，例如打开主控内置应用或跳转外链。
+   */
+  navigate: (payload: SuiteNavigationPayload) => boolean;
   /**
    * 手动请求主控聚焦承载窗口；常规点击和焦点变化由 SDK 自动上报。
    */
