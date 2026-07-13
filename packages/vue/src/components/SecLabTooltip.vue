@@ -52,10 +52,18 @@ const calculatePosition = () => {
 
   let placement = props.position;
   const fits = (candidate: TooltipPosition) => {
-    if (candidate === "top") return triggerRect.top - tooltipRect.height - offset >= margin;
-    if (candidate === "bottom") return triggerRect.bottom + tooltipRect.height + offset <= viewportHeight - margin;
-    if (candidate === "left") return triggerRect.left - tooltipRect.width - offset >= margin;
-    return triggerRect.right + tooltipRect.width + offset <= viewportWidth - margin;
+    if (candidate === "top")
+      return triggerRect.top - tooltipRect.height - offset >= margin;
+    if (candidate === "bottom")
+      return (
+        triggerRect.bottom + tooltipRect.height + offset <=
+        viewportHeight - margin
+      );
+    if (candidate === "left")
+      return triggerRect.left - tooltipRect.width - offset >= margin;
+    return (
+      triggerRect.right + tooltipRect.width + offset <= viewportWidth - margin
+    );
   };
   const opposite: Record<TooltipPosition, TooltipPosition> = {
     top: "bottom",
@@ -63,7 +71,8 @@ const calculatePosition = () => {
     left: "right",
     right: "left",
   };
-  if (!fits(placement) && fits(opposite[placement])) placement = opposite[placement];
+  if (!fits(placement) && fits(opposite[placement]))
+    placement = opposite[placement];
   actualPosition.value = placement;
 
   switch (placement) {
@@ -94,8 +103,14 @@ const calculatePosition = () => {
       break;
   }
 
-  top = Math.min(Math.max(top, margin), Math.max(margin, viewportHeight - margin - tooltipRect.height));
-  left = Math.min(Math.max(left, margin), Math.max(margin, viewportWidth - margin - tooltipRect.width));
+  top = Math.min(
+    Math.max(top, margin),
+    Math.max(margin, viewportHeight - margin - tooltipRect.height),
+  );
+  left = Math.min(
+    Math.max(left, margin),
+    Math.max(margin, viewportWidth - margin - tooltipRect.width),
+  );
   tooltipStyle.value = {
     position: "fixed",
     top: `${top}px`,

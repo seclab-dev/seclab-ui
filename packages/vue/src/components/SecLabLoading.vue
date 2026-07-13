@@ -20,10 +20,16 @@ defineProps<Props>();
   <div
     class="sl-loading-host"
     :class="{ 'is-cover': cover, 'is-loading': loading }"
+    :aria-busy="loading"
   >
     <slot></slot>
     <Transition name="sl-loading-fade">
-      <div v-if="loading" class="sl-loading-mask">
+      <div
+        v-if="loading"
+        class="sl-loading-mask"
+        role="status"
+        aria-live="polite"
+      >
         <div class="sl-loading-spinner">
           <svg class="sl-spinner" viewBox="0 0 50 50">
             <circle
@@ -69,7 +75,7 @@ defineProps<Props>();
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 1;
   backdrop-filter: blur(2px);
 }
 

@@ -58,9 +58,9 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
   ...rest
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownPlacement, setDropdownPlacement] = useState<
-    "top" | "bottom"
-  >("bottom");
+  const [dropdownPlacement, setDropdownPlacement] = useState<"top" | "bottom">(
+    "bottom",
+  );
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({
     visibility: "hidden",
   });
@@ -121,8 +121,14 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
     setIsOpen((prev) => {
       const next = !prev;
       if (next) {
-        const selected = options.findIndex((option) => option.value === value && !option.disabled);
-        setActiveIndex(selected >= 0 ? selected : options.findIndex((option) => !option.disabled));
+        const selected = options.findIndex(
+          (option) => option.value === value && !option.disabled,
+        );
+        setActiveIndex(
+          selected >= 0
+            ? selected
+            : options.findIndex((option) => !option.disabled),
+        );
       }
       return next;
     });
@@ -135,7 +141,11 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
       next = (next + direction + options.length) % options.length;
       if (!options[next]?.disabled) {
         setActiveIndex(next);
-        requestAnimationFrame(() => dropdownRef.current?.querySelector<HTMLElement>(`[data-option-index="${next}"]`)?.scrollIntoView({ block: "nearest" }));
+        requestAnimationFrame(() =>
+          dropdownRef.current
+            ?.querySelector<HTMLElement>(`[data-option-index="${next}"]`)
+            ?.scrollIntoView({ block: "nearest" }),
+        );
         return;
       }
     }
@@ -149,13 +159,20 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
       if (event.key === "ArrowDown") moveActive(1);
       else if (event.key === "ArrowUp") moveActive(-1);
       else {
-        const indexes = options.map((option, index) => ({ option, index })).filter(({ option }) => !option.disabled);
-        setActiveIndex(event.key === "Home" ? (indexes[0]?.index ?? -1) : (indexes.at(-1)?.index ?? -1));
+        const indexes = options
+          .map((option, index) => ({ option, index }))
+          .filter(({ option }) => !option.disabled);
+        setActiveIndex(
+          event.key === "Home"
+            ? (indexes[0]?.index ?? -1)
+            : (indexes.at(-1)?.index ?? -1),
+        );
       }
     } else if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       if (!isOpen) toggleDropdown();
-      else if (activeIndex >= 0 && options[activeIndex]) selectOption(options[activeIndex]);
+      else if (activeIndex >= 0 && options[activeIndex])
+        selectOption(options[activeIndex]);
     } else if (event.key === "Escape" && isOpen) {
       event.preventDefault();
       setIsOpen(false);
@@ -189,7 +206,16 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
       ref={selectRef}
       {...rest}
     >
-      <div className="sl-select-trigger" role="combobox" tabIndex={disabled ? -1 : 0} aria-expanded={isOpen} aria-controls={listboxId} aria-haspopup="listbox" onClick={toggleDropdown} onKeyDown={handleKeyDown}>
+      <div
+        className="sl-select-trigger"
+        role="combobox"
+        tabIndex={disabled ? -1 : 0}
+        aria-expanded={isOpen}
+        aria-controls={listboxId}
+        aria-haspopup="listbox"
+        onClick={toggleDropdown}
+        onKeyDown={handleKeyDown}
+      >
         <span className="sl-select-label">{selectedLabel}</span>
         <span className="sl-select-arrow"></span>
       </div>

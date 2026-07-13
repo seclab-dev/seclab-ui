@@ -15,6 +15,8 @@ interface Props {
   showIcon?: boolean;
   /** 是否可关闭 */
   closable?: boolean;
+  /** 关闭按钮的无障碍标签 */
+  closeLabel?: string;
 }
 
 withDefaults(defineProps<Props>(), {
@@ -60,6 +62,7 @@ function alertIcon(type: NonNullable<Props["type"]>) {
         v-if="closable"
         type="button"
         class="sl-alert-close"
+        :aria-label="closeLabel ?? 'Close alert'"
         @click="handleClose"
       >
         ×
@@ -118,6 +121,12 @@ function alertIcon(type: NonNullable<Props["type"]>) {
 
 .sl-alert-close:hover {
   opacity: 1;
+}
+
+.sl-alert-close:focus-visible {
+  outline: none;
+  border-radius: var(--sdl-radius-xs);
+  box-shadow: var(--sdl-focus-ring);
 }
 
 /* --- 类型预设 (SDL 软色调) --- */

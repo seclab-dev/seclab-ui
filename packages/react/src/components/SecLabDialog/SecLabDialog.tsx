@@ -73,7 +73,9 @@ export const SecLabDialog: React.FC<SecLabDialogProps> = ({
       >
         {/* 头部标题栏 */}
         <div className="sl-dialog-header" data-slot="header">
-          <span id={titleId} className="sl-dialog-title">{title}</span>
+          <span id={titleId} className="sl-dialog-title">
+            {title}
+          </span>
           <button
             type="button"
             className="sl-dialog-close-btn"

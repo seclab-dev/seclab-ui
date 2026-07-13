@@ -33,7 +33,9 @@ export function activateModalLifecycle(
       return;
     }
     if (event.key !== "Tab") return;
-    const items = [...container.querySelectorAll<HTMLElement>(focusableSelector)];
+    const items = [
+      ...container.querySelectorAll<HTMLElement>(focusableSelector),
+    ];
     if (items.length === 0) {
       event.preventDefault();
       container.focus();
@@ -54,7 +56,8 @@ export function activateModalLifecycle(
   return () => {
     document.removeEventListener("keydown", handleKeydown);
     bodyLockCount = Math.max(0, bodyLockCount - 1);
-    if (bodyLockCount === 0) document.body.style.overflow = previousBodyOverflow;
+    if (bodyLockCount === 0)
+      document.body.style.overflow = previousBodyOverflow;
     if (previousFocus?.isConnected) previousFocus.focus();
   };
 }

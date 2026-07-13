@@ -32,10 +32,25 @@ function handleTabClick(tab: TabItem) {
 function handleKeydown(event: KeyboardEvent, index: number) {
   if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
   event.preventDefault();
-  const enabled = props.tabs.map((tab, tabIndex) => ({ tab, tabIndex })).filter(({ tab }) => !tab.disabled);
+  const enabled = props.tabs
+    .map((tab, tabIndex) => ({ tab, tabIndex }))
+    .filter(({ tab }) => !tab.disabled);
   const current = enabled.findIndex(({ tabIndex }) => tabIndex === index);
-  const target = event.key === "Home" ? enabled[0] : event.key === "End" ? enabled.at(-1) : enabled[(current + (event.key === "ArrowRight" ? 1 : -1) + enabled.length) % enabled.length];
-  if (target) { handleTabClick(target.tab); document.querySelector<HTMLElement>(`[data-tab-name="${target.tab.name}"]`)?.focus(); }
+  const target =
+    event.key === "Home"
+      ? enabled[0]
+      : event.key === "End"
+        ? enabled.at(-1)
+        : enabled[
+            (current + (event.key === "ArrowRight" ? 1 : -1) + enabled.length) %
+              enabled.length
+          ];
+  if (target) {
+    handleTabClick(target.tab);
+    document
+      .querySelector<HTMLElement>(`[data-tab-name="${target.tab.name}"]`)
+      ?.focus();
+  }
 }
 </script>
 
@@ -94,7 +109,10 @@ function handleKeydown(event: KeyboardEvent, index: number) {
   border: 0;
   background: transparent;
 }
-.sl-tabs-item:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); }
+.sl-tabs-item:focus-visible {
+  outline: none;
+  box-shadow: var(--sdl-focus-ring);
+}
 
 .sl-tabs-item:hover:not(.is-disabled) {
   color: var(--sdl-text-primary);

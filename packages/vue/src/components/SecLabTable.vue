@@ -5,6 +5,8 @@
  * 支持数据驱动列配置、自定义插槽渲染、固定列以及全网格边框。
  */
 
+import type { CSSProperties } from "vue";
+
 export interface SecLabTableColumn {
   prop?: string;
   label: string;
@@ -14,10 +16,10 @@ export interface SecLabTableColumn {
   headerAlign?: "left" | "center" | "right";
   slot?: string;
   headerSlot?: string;
-  fixed?: string;
+  fixed?: "left" | "right";
 }
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     /** 表格数据 */
     data: T[];
@@ -27,6 +29,8 @@ withDefaults(
     border?: boolean;
     /** 无数据时显示的占位文案 */
     emptyText?: string;
+    /** 稳定行键字段或计算函数。 */
+    rowKey?: string | ((row: T) => string | number);
   }>(),
   {
     border: false,
@@ -68,6 +72,38 @@ function getCellStyle(col: SecLabTableColumn) {
     textAlign: col.align || "left", // 默认内容居左
   };
 }
+function fixedOffset(index: number, side: "left" | "right") {
+  const range =
+    side === "left"
+      ? props.columns.slice(0, index)
+      : props.columns.slice(index + 1);
+  return range
+    .filter((column) => column.fixed === side)
+    .reduce(
+      (total, column) =>
+        total + (typeof column.width === "number" ? column.width : 0),
+      0,
+    );
+}
+function getColumnStyle(
+  col: SecLabTableColumn,
+  index: number,
+  header = false,
+): CSSProperties {
+  const base = header ? getHeaderStyle(col) : getCellStyle(col);
+  return col.fixed
+    ? {
+        ...base,
+        position: "sticky",
+        [col.fixed]: `${fixedOffset(index, col.fixed)}px`,
+      }
+    : base;
+}
+function resolveRowKey(row: T, index: number) {
+  if (typeof props.rowKey === "function") return props.rowKey(row);
+  if (props.rowKey) return row[props.rowKey];
+  return index;
+}
 </script>
 
 <template>
@@ -85,7 +121,7 @@ function getCellStyle(col: SecLabTableColumn) {
               :key="index"
               class="sl-table-header-cell"
               :class="[col.fixed ? `is-fixed-${col.fixed}` : '']"
-              :style="getHeaderStyle(col)"
+              :style="getColumnStyle(col, index, true)"
             >
               <div class="sl-cell">
                 <!-- 如果配置了表头插槽且传入了插槽内容 -->
@@ -105,7 +141,7 @@ function getCellStyle(col: SecLabTableColumn) {
           <template v-if="data.length > 0">
             <tr
               v-for="(row, rowIndex) in data"
-              :key="rowIndex"
+              :key="resolveRowKey(row, rowIndex)"
               class="sl-table-row"
               @mouseenter="
                 (event) => emit('rowMouseenter', row, event, rowIndex)
@@ -119,7 +155,7 @@ function getCellStyle(col: SecLabTableColumn) {
                 :key="colIndex"
                 class="sl-table-cell"
                 :class="[col.fixed ? `is-fixed-${col.fixed}` : '']"
-                :style="getCellStyle(col)"
+                :style="getColumnStyle(col, colIndex)"
               >
                 <div class="sl-cell">
                   <!-- 如果配置了插槽且传入了插槽内容 -->
@@ -234,6 +270,15 @@ function getCellStyle(col: SecLabTableColumn) {
   right: 0;
   z-index: 20;
   background-color: var(--sdl-bg-panel); /* 固定列需要有不透明背景 */
+}
+.is-fixed-left {
+  position: sticky;
+  left: 0;
+  z-index: 20;
+  background-color: var(--sdl-bg-panel);
+}
+.sl-table-header-cell.is-fixed-left {
+  z-index: 30;
 }
 
 /* 如果表头也有固定列，层级需要更高 */

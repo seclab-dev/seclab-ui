@@ -82,6 +82,15 @@
   z-index: 20;
   background-color: var(--sdl-bg-panel);
 }
+.is-fixed-left {
+  position: sticky;
+  left: 0;
+  z-index: 20;
+  background-color: var(--sdl-bg-panel);
+}
+.sl-table-header-cell.is-fixed-left {
+  z-index: 30;
+}
 
 .sl-table-header-cell.is-fixed-right {
   z-index: 30;

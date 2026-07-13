@@ -23,11 +23,12 @@ export const SecLabLoading: React.FC<SecLabLoadingProps> = ({
       className={`sl-loading-host ${cover ? "is-cover" : ""} ${
         loading ? "is-loading" : ""
       } ${className}`.trim()}
+      aria-busy={loading}
       {...rest}
     >
       {children}
       {loading && (
-        <div className="sl-loading-mask">
+        <div className="sl-loading-mask" role="status" aria-live="polite">
           <div className="sl-loading-spinner">
             <svg className="sl-spinner" viewBox="0 0 50 50">
               <circle

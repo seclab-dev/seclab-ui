@@ -55,10 +55,19 @@ export const SecLabModal: React.FC<SecLabModalProps> = ({
       role="presentation"
       {...rest}
     >
-      <div ref={cardRef} className="sl-modal-card" role="alertdialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
+      <div
+        ref={cardRef}
+        className="sl-modal-card"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+      >
         {/* 头部标题栏 */}
         <div className="sl-modal-header" data-slot="header">
-          <h3 id={titleId} className="sl-modal-title">{title}</h3>
+          <h3 id={titleId} className="sl-modal-title">
+            {title}
+          </h3>
         </div>
 
         {/* 消息内容 */}

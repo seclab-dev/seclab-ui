@@ -60,7 +60,11 @@ function toggle() {
   background: transparent;
   font: inherit;
 }
-.sl-switch:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); border-radius: var(--sdl-radius-pill); }
+.sl-switch:focus-visible {
+  outline: none;
+  box-shadow: var(--sdl-focus-ring);
+  border-radius: var(--sdl-radius-pill);
+}
 
 .sl-switch.is-disabled {
   cursor: not-allowed;

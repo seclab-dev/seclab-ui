@@ -66,24 +66,39 @@ const handleActionClick = (action: Action) => {
   showMenu.value = false;
 };
 const focusItem = (index: number) => {
-  const items = [...(dropdownRef.value?.querySelectorAll<HTMLButtonElement>(".sl-dropdown-item:not(:disabled)") ?? [])];
+  const items = [
+    ...(dropdownRef.value?.querySelectorAll<HTMLButtonElement>(
+      ".sl-dropdown-item:not(:disabled)",
+    ) ?? []),
+  ];
   items[(index + items.length) % items.length]?.focus();
 };
 const handleTriggerKeydown = (event: KeyboardEvent) => {
   if (!["Enter", " ", "ArrowDown"].includes(event.key)) return;
   event.preventDefault();
   showMenu.value = true;
-  nextTick(() => { updateDropdownPosition(); focusItem(0); });
+  nextTick(() => {
+    updateDropdownPosition();
+    focusItem(0);
+  });
 };
 const handleMenuKeydown = (event: KeyboardEvent) => {
-  const items = [...(dropdownRef.value?.querySelectorAll<HTMLButtonElement>(".sl-dropdown-item:not(:disabled)") ?? [])];
+  const items = [
+    ...(dropdownRef.value?.querySelectorAll<HTMLButtonElement>(
+      ".sl-dropdown-item:not(:disabled)",
+    ) ?? []),
+  ];
   const index = items.indexOf(document.activeElement as HTMLButtonElement);
   if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-    event.preventDefault(); focusItem(index + (event.key === "ArrowDown" ? 1 : -1));
+    event.preventDefault();
+    focusItem(index + (event.key === "ArrowDown" ? 1 : -1));
   } else if (event.key === "Home" || event.key === "End") {
-    event.preventDefault(); focusItem(event.key === "Home" ? 0 : items.length - 1);
+    event.preventDefault();
+    focusItem(event.key === "Home" ? 0 : items.length - 1);
   } else if (event.key === "Escape") {
-    event.preventDefault(); showMenu.value = false; menuRef.value?.querySelector<HTMLButtonElement>(".sl-action-btn")?.focus();
+    event.preventDefault();
+    showMenu.value = false;
+    menuRef.value?.querySelector<HTMLButtonElement>(".sl-action-btn")?.focus();
   }
 };
 
@@ -113,7 +128,15 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="sl-action-menu" ref="menuRef">
-    <button type="button" class="sl-action-btn" :disabled="disabled" aria-haspopup="menu" :aria-expanded="showMenu" @click.stop="toggleMenu" @keydown="handleTriggerKeydown">
+    <button
+      type="button"
+      class="sl-action-btn"
+      :disabled="disabled"
+      aria-haspopup="menu"
+      :aria-expanded="showMenu"
+      @click.stop="toggleMenu"
+      @keydown="handleTriggerKeydown"
+    >
       <SecLabIcon class="sl-action-btn-icon" name="settings" :size="16" />
       <span class="sl-action-btn-text">{{ label || "操作" }}</span>
     </button>
@@ -184,7 +207,11 @@ onBeforeUnmount(() => {
   background-color: var(--sdl-bg-hover);
   border-color: var(--sdl-border-brand);
 }
-.sl-action-btn:focus-visible, .sl-dropdown-item:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); }
+.sl-action-btn:focus-visible,
+.sl-dropdown-item:focus-visible {
+  outline: none;
+  box-shadow: var(--sdl-focus-ring);
+}
 
 .sl-action-btn:disabled {
   opacity: 0.5;

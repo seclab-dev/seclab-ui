@@ -46,7 +46,8 @@ watch(
     deactivate = undefined;
     if (visible) {
       await nextTick();
-      if (cardRef.value) deactivate = activateModalLifecycle(cardRef.value, () => emit("close"));
+      if (cardRef.value)
+        deactivate = activateModalLifecycle(cardRef.value, () => emit("close"));
     }
   },
   { immediate: true },

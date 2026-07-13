@@ -29,6 +29,9 @@ interface Props {
   step?: number;
   /** 自动填充属性 */
   autocomplete?: string;
+  id?: string;
+  ariaDescribedby?: string;
+  invalid?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -40,10 +43,10 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: string): void;
+  (e: "update:modelValue", value: string | number | null): void;
   (e: "focus", event: FocusEvent): void;
   (e: "blur", event: FocusEvent): void;
-  (e: "change", value: string): void;
+  (e: "change", value: string | number | null): void;
 }>();
 
 import { ref, computed } from "vue";
@@ -52,12 +55,26 @@ const isPasswordVisible = ref(false);
 
 function handleInput(event: Event) {
   const target = event.target as HTMLInputElement | HTMLTextAreaElement;
-  emit("update:modelValue", target.value);
+  emit(
+    "update:modelValue",
+    props.type === "number"
+      ? target.value === ""
+        ? null
+        : Number(target.value)
+      : target.value,
+  );
 }
 
 function handleChange(event: Event) {
   const target = event.target as HTMLInputElement | HTMLTextAreaElement;
-  emit("change", target.value);
+  emit(
+    "change",
+    props.type === "number"
+      ? target.value === ""
+        ? null
+        : Number(target.value)
+      : target.value,
+  );
 }
 
 function togglePasswordVisibility() {
@@ -80,6 +97,9 @@ const inputType = computed(() => {
     <template v-if="type === 'textarea'">
       <textarea
         class="sl-textarea"
+        :id="id"
+        :aria-describedby="ariaDescribedby"
+        :aria-invalid="invalid || undefined"
         :value="modelValue?.toString()"
         :placeholder="placeholder"
         :disabled="disabled"
@@ -96,6 +116,9 @@ const inputType = computed(() => {
       <div class="sl-input-inner-wrapper">
         <input
           class="sl-input"
+          :id="id"
+          :aria-describedby="ariaDescribedby"
+          :aria-invalid="invalid || undefined"
           :type="inputType"
           :value="modelValue?.toString()"
           :placeholder="placeholder"
@@ -115,6 +138,9 @@ const inputType = computed(() => {
           v-if="showPassword && type === 'password'"
           type="button"
           class="sl-input-password-toggle"
+          :disabled="disabled"
+          :aria-label="isPasswordVisible ? 'Hide password' : 'Show password'"
+          :aria-pressed="isPasswordVisible"
           @click="togglePasswordVisibility"
         >
           <SecLabIcon

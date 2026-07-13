@@ -81,8 +81,13 @@ function toggleDropdown() {
   if (props.disabled) return;
   isOpen.value = !isOpen.value;
   if (isOpen.value) {
-    const selected = props.options.findIndex((option) => option.value === props.modelValue && !option.disabled);
-    activeIndex.value = selected >= 0 ? selected : props.options.findIndex((option) => !option.disabled);
+    const selected = props.options.findIndex(
+      (option) => option.value === props.modelValue && !option.disabled,
+    );
+    activeIndex.value =
+      selected >= 0
+        ? selected
+        : props.options.findIndex((option) => !option.disabled);
   }
 }
 
@@ -103,7 +108,11 @@ function moveActive(direction: 1 | -1) {
     next = (next + direction + props.options.length) % props.options.length;
     if (!props.options[next]?.disabled) {
       activeIndex.value = next;
-      nextTick(() => dropdownRef.value?.querySelector<HTMLElement>(`[data-option-index="${next}"]`)?.scrollIntoView({ block: "nearest" }));
+      nextTick(() =>
+        dropdownRef.value
+          ?.querySelector<HTMLElement>(`[data-option-index="${next}"]`)
+          ?.scrollIntoView({ block: "nearest" }),
+      );
       return;
     }
   }
@@ -117,13 +126,19 @@ function handleKeydown(event: KeyboardEvent) {
     if (event.key === "ArrowDown") moveActive(1);
     else if (event.key === "ArrowUp") moveActive(-1);
     else {
-      const indexes = props.options.map((option, index) => ({ option, index })).filter(({ option }) => !option.disabled);
-      activeIndex.value = event.key === "Home" ? (indexes[0]?.index ?? -1) : (indexes.at(-1)?.index ?? -1);
+      const indexes = props.options
+        .map((option, index) => ({ option, index }))
+        .filter(({ option }) => !option.disabled);
+      activeIndex.value =
+        event.key === "Home"
+          ? (indexes[0]?.index ?? -1)
+          : (indexes.at(-1)?.index ?? -1);
     }
   } else if (event.key === "Enter" || event.key === " ") {
     event.preventDefault();
     if (!isOpen.value) toggleDropdown();
-    else if (activeIndex.value >= 0) selectOption(props.options[activeIndex.value]);
+    else if (activeIndex.value >= 0)
+      selectOption(props.options[activeIndex.value]);
   } else if (event.key === "Escape" && isOpen.value) {
     event.preventDefault();
     isOpen.value = false;
@@ -173,7 +188,16 @@ onUnmounted(() => {
     :class="{ 'is-open': isOpen, 'is-disabled': disabled }"
     ref="selectRef"
   >
-    <div class="sl-select-trigger" role="combobox" tabindex="0" :aria-expanded="isOpen" :aria-controls="listboxId" aria-haspopup="listbox" @click="toggleDropdown" @keydown="handleKeydown">
+    <div
+      class="sl-select-trigger"
+      role="combobox"
+      tabindex="0"
+      :aria-expanded="isOpen"
+      :aria-controls="listboxId"
+      aria-haspopup="listbox"
+      @click="toggleDropdown"
+      @keydown="handleKeydown"
+    >
       <span class="sl-select-label">{{ selectedLabel }}</span>
       <span class="sl-select-arrow"></span>
     </div>
@@ -297,8 +321,14 @@ onUnmounted(() => {
   background-color: var(--sdl-bg-hover);
   color: var(--sdl-text-primary);
 }
-.sl-select-option.active { background-color: var(--sdl-bg-hover); }
-.sl-select-trigger:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); border-color: var(--sdl-primary); }
+.sl-select-option.active {
+  background-color: var(--sdl-bg-hover);
+}
+.sl-select-trigger:focus-visible {
+  outline: none;
+  box-shadow: var(--sdl-focus-ring);
+  border-color: var(--sdl-primary);
+}
 
 .sl-select-option.selected {
   background-color: var(--sdl-bg-active);

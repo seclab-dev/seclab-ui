@@ -1,8 +1,8 @@
 .sl-toast-container {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  width: 320px;
+  top: var(--sdl-space-4);
+  right: var(--sdl-space-4);
+  width: min(320px, calc(100vw - var(--sdl-space-8)));
   z-index: var(--sdl-z-index-toast);
   display: flex;
   flex-direction: column;
@@ -19,7 +19,6 @@
   border-radius: var(--sdl-radius-md);
   border: 1px solid var(--sdl-border-strong);
   box-shadow: var(--sdl-shadow-panel);
-  cursor: pointer;
   position: relative;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -84,4 +83,10 @@
 
 .sl-toast-close:hover {
   color: var(--sdl-text-primary);
+}
+
+.sl-toast-close:focus-visible {
+  outline: none;
+  border-radius: var(--sdl-radius-xs);
+  box-shadow: var(--sdl-focus-ring);
 }

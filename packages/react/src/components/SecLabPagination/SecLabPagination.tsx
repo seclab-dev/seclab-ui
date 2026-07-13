@@ -79,7 +79,11 @@ export const SecLabPagination: React.FC<SecLabPaginationProps> = ({
   };
 
   return (
-    <nav className={`sl-pagination ${className}`.trim()} aria-label={ariaLabel} {...rest}>
+    <nav
+      className={`sl-pagination ${className}`.trim()}
+      aria-label={ariaLabel}
+      {...rest}
+    >
       <button
         type="button"
         className="sl-pagination-btn"
@@ -94,7 +98,13 @@ export const SecLabPagination: React.FC<SecLabPaginationProps> = ({
         const isActive = page === currentPage;
         const isEllipsis = typeof page === "string";
         return isEllipsis ? (
-          <span key={index} className="sl-pagination-ellipsis" aria-hidden="true">…</span>
+          <span
+            key={index}
+            className="sl-pagination-ellipsis"
+            aria-hidden="true"
+          >
+            …
+          </span>
         ) : (
           <button
             key={index}

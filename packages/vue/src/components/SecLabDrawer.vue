@@ -51,7 +51,8 @@ watch(
     deactivate = undefined;
     if (visible) {
       await nextTick();
-      if (panelRef.value) deactivate = activateModalLifecycle(panelRef.value, closeDrawer);
+      if (panelRef.value)
+        deactivate = activateModalLifecycle(panelRef.value, closeDrawer);
     }
   },
   { immediate: true },
@@ -79,7 +80,14 @@ onBeforeUnmount(() => deactivate?.());
         >
           <div class="sl-drawer-header" data-slot="header">
             <h3 :id="titleId" class="sl-drawer-title">{{ props.title }}</h3>
-            <button type="button" class="sl-drawer-close-btn" aria-label="Close drawer" @click="closeDrawer">×</button>
+            <button
+              type="button"
+              class="sl-drawer-close-btn"
+              aria-label="Close drawer"
+              @click="closeDrawer"
+            >
+              ×
+            </button>
           </div>
           <div class="sl-drawer-body">
             <slot />

@@ -15,11 +15,14 @@ export interface SecLabToastProps extends React.HTMLAttributes<HTMLDivElement> {
   toasts: ToastItem[];
   /** 关闭事件 */
   onClose?: (id: string) => void;
+  /** 关闭按钮的无障碍标签 */
+  closeLabel?: string;
 }
 
 export const SecLabToast: React.FC<SecLabToastProps> = ({
   toasts = [],
   onClose,
+  closeLabel = "Close notification",
   className = "",
   ...rest
 }) => {
@@ -30,21 +33,20 @@ export const SecLabToast: React.FC<SecLabToastProps> = ({
     return "info";
   };
 
-  const handleClose = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    onClose?.(id);
-  };
-
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div className={`sl-toast-container ${className}`.trim()} {...rest}>
+    <div
+      className={`sl-toast-container ${className}`.trim()}
+      aria-live="polite"
+      aria-relevant="additions"
+      {...rest}
+    >
       {toasts.map((toast) => (
         <div
           key={toast.id}
           className={`sl-toast-item is-${toast.type}`}
-          role="alert"
-          onClick={() => onClose?.(toast.id)}
+          role={toast.type === "error" ? "alert" : "status"}
         >
           <div className="sl-toast-icon">
             <SecLabIcon name={getToastIconName(toast.type)} size={20} />
@@ -54,8 +56,10 @@ export const SecLabToast: React.FC<SecLabToastProps> = ({
             <p className="sl-toast-message">{toast.message}</p>
           </div>
           <button
+            type="button"
             className="sl-toast-close"
-            onClick={(e) => handleClose(e, toast.id)}
+            aria-label={closeLabel}
+            onClick={() => onClose?.(toast.id)}
           >
             &times;
           </button>

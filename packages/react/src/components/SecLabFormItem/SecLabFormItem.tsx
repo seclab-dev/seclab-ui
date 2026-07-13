@@ -8,12 +8,18 @@ export interface SecLabFormItemProps extends React.HTMLAttributes<HTMLDivElement
   required?: boolean;
   /** 提示文本 */
   hint?: string;
+  htmlFor?: string;
+  error?: string;
+  hintId?: string;
 }
 
 export const SecLabFormItem: React.FC<SecLabFormItemProps> = ({
   label,
   required = false,
   hint,
+  htmlFor,
+  error,
+  hintId,
   className = "",
   children,
   ...rest
@@ -21,14 +27,23 @@ export const SecLabFormItem: React.FC<SecLabFormItemProps> = ({
   return (
     <div className={`sl-form-item ${className}`.trim()} {...rest}>
       {label && (
-        <label className="sl-form-item-label">
+        <label className="sl-form-item-label" htmlFor={htmlFor}>
           {required && <span className="sl-form-item-required">*</span>}
           {label}
         </label>
       )}
       <div className="sl-form-item-content">
         {children}
-        {hint && <div className="sl-form-item-hint">{hint}</div>}
+        {hint && (
+          <div id={hintId} className="sl-form-item-hint">
+            {hint}
+          </div>
+        )}
+        {error && (
+          <div className="sl-form-item-error" role="alert">
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { SecLabIcon } from "../SecLabIcon/SecLabIcon";
 import "./SecLabInput.css";
 
-export interface SecLabInputProps extends Omit<
+export interface SecLabInputProps<
+  T extends string | number | null = string,
+> extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
   "value" | "onChange" | "onFocus" | "onBlur"
 > {
   /** 绑定值 */
-  value?: string | number | null;
+  value?: T;
   /** 输入类型 */
   type?: "text" | "password" | "textarea" | "number" | "datetime-local";
   /** 占位符 */
@@ -34,15 +36,18 @@ export interface SecLabInputProps extends Omit<
   autocomplete?: string;
   autoComplete?: string;
   /** 值改变事件 */
-  onChange?: (value: string) => void;
+  onChange?: (value: T) => void;
+  invalid?: boolean;
+  inputId?: string;
+  ariaDescribedby?: string;
   /** focus 事件 */
   onFocus?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
   /** blur 事件 */
   onBlur?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
 }
 
-export const SecLabInput: React.FC<SecLabInputProps> = ({
-  value = "",
+export function SecLabInput<T extends string | number | null = string>({
+  value,
   type = "text",
   placeholder,
   disabled = false,
@@ -60,15 +65,25 @@ export const SecLabInput: React.FC<SecLabInputProps> = ({
   onChange,
   onFocus,
   onBlur,
+  invalid = false,
+  inputId,
+  ariaDescribedby,
   className = "",
   ...rest
-}) => {
+}: SecLabInputProps<T>) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const handleInput = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    onChange?.(event.target.value);
+    const nextValue = (
+      type === "number"
+        ? event.target.value === ""
+          ? null
+          : Number(event.target.value)
+        : event.target.value
+    ) as T;
+    onChange?.(nextValue);
   };
 
   const togglePasswordVisibility = () => {
@@ -92,6 +107,8 @@ export const SecLabInput: React.FC<SecLabInputProps> = ({
       {type === "textarea" ? (
         <textarea
           className="sl-textarea"
+          id={inputId}
+          aria-describedby={ariaDescribedby}
           value={displayValue}
           placeholder={placeholder}
           disabled={disabled}
@@ -101,11 +118,14 @@ export const SecLabInput: React.FC<SecLabInputProps> = ({
           onChange={handleInput}
           onFocus={onFocus}
           onBlur={onBlur}
+          aria-invalid={invalid || undefined}
         />
       ) : (
         <div className="sl-input-inner-wrapper">
           <input
             className="sl-input"
+            id={inputId}
+            aria-describedby={ariaDescribedby}
             type={inputType}
             value={displayValue}
             placeholder={placeholder}
@@ -119,12 +139,16 @@ export const SecLabInput: React.FC<SecLabInputProps> = ({
             onChange={handleInput}
             onFocus={onFocus}
             onBlur={onBlur}
+            aria-invalid={invalid || undefined}
           />
           {showPassword && type === "password" && (
             <button
               type="button"
               className="sl-input-password-toggle"
               onClick={togglePasswordVisibility}
+              disabled={disabled}
+              aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+              aria-pressed={isPasswordVisible}
             >
               <SecLabIcon
                 name={isPasswordVisible ? "eye-off" : "lock"}
@@ -136,4 +160,4 @@ export const SecLabInput: React.FC<SecLabInputProps> = ({
       )}
     </div>
   );
-};
+}

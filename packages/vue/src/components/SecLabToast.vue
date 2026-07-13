@@ -17,6 +17,8 @@ export interface ToastItem {
 defineProps<{
   /** 通知列表 */
   toasts: ToastItem[];
+  /** 关闭按钮的无障碍标签 */
+  closeLabel?: string;
 }>();
 
 const emit = defineEmits<{
@@ -33,15 +35,18 @@ function toastIcon(type: ToastItem["type"]) {
 
 <template>
   <Teleport to="body">
-    <div class="sl-toast-container">
+    <div
+      class="sl-toast-container"
+      aria-live="polite"
+      aria-relevant="additions"
+    >
       <TransitionGroup name="sl-toast-list">
         <div
           v-for="toast in toasts"
           :key="toast.id"
           class="sl-toast-item"
           :class="[`is-${toast.type}`]"
-          role="alert"
-          @click="emit('close', toast.id)"
+          :role="toast.type === 'error' ? 'alert' : 'status'"
         >
           <div class="sl-toast-icon">
             <SecLabIcon :name="toastIcon(toast.type)" :size="20" />
@@ -50,7 +55,12 @@ function toastIcon(type: ToastItem["type"]) {
             <h4 class="sl-toast-title">{{ toast.title }}</h4>
             <p class="sl-toast-message">{{ toast.message }}</p>
           </div>
-          <button class="sl-toast-close" @click.stop="emit('close', toast.id)">
+          <button
+            type="button"
+            class="sl-toast-close"
+            :aria-label="closeLabel ?? 'Close notification'"
+            @click="emit('close', toast.id)"
+          >
             ×
           </button>
         </div>
@@ -62,9 +72,9 @@ function toastIcon(type: ToastItem["type"]) {
 <style scoped>
 .sl-toast-container {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  width: 320px;
+  top: var(--sdl-space-4);
+  right: var(--sdl-space-4);
+  width: min(320px, calc(100vw - var(--sdl-space-8)));
   z-index: var(--sdl-z-index-toast);
   display: flex;
   flex-direction: column;
@@ -81,7 +91,6 @@ function toastIcon(type: ToastItem["type"]) {
   border-radius: var(--sdl-radius-md);
   border: 1px solid var(--sdl-border-strong);
   box-shadow: var(--sdl-shadow-panel);
-  cursor: pointer;
   position: relative;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -146,6 +155,12 @@ function toastIcon(type: ToastItem["type"]) {
 
 .sl-toast-close:hover {
   color: var(--sdl-text-primary);
+}
+
+.sl-toast-close:focus-visible {
+  outline: none;
+  border-radius: var(--sdl-radius-xs);
+  box-shadow: var(--sdl-focus-ring);
 }
 
 /* 过渡动画 */

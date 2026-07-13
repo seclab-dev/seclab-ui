@@ -15,6 +15,8 @@ export interface SecLabAlertProps extends React.HTMLAttributes<HTMLDivElement> {
   closable?: boolean;
   /** 关闭事件 */
   onClose?: () => void;
+  /** 关闭按钮的无障碍标签 */
+  closeLabel?: string;
   /** 子元素，将作为 description 渲染 */
   children?: React.ReactNode;
 }
@@ -26,6 +28,7 @@ export const SecLabAlert: React.FC<SecLabAlertProps> = ({
   showIcon = false,
   closable = false,
   onClose,
+  closeLabel = "Close alert",
   className = "",
   children,
   ...rest
@@ -62,7 +65,12 @@ export const SecLabAlert: React.FC<SecLabAlertProps> = ({
         <div className="sl-alert-description">{children || description}</div>
       </div>
       {closable && (
-        <button type="button" className="sl-alert-close" onClick={handleClose}>
+        <button
+          type="button"
+          className="sl-alert-close"
+          aria-label={closeLabel}
+          onClick={handleClose}
+        >
           ×
         </button>
       )}

@@ -167,7 +167,9 @@ export const SecLabDateTimeRangePicker: React.FC<
     startOfMonth(new Date()),
   );
   const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({});
-  const [panelPlacement, setPanelPlacement] = useState<"top" | "bottom">("bottom");
+  const [panelPlacement, setPanelPlacement] = useState<"top" | "bottom">(
+    "bottom",
+  );
 
   const hours = useMemo(
     () => Array.from({ length: 24 }, (_, index) => index),

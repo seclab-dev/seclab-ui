@@ -26,7 +26,10 @@
   border: 0;
   background: transparent;
 }
-.sl-tabs-item:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); }
+.sl-tabs-item:focus-visible {
+  outline: none;
+  box-shadow: var(--sdl-focus-ring);
+}
 
 .sl-tabs-item:hover:not(.is-disabled) {
   color: var(--sdl-text-primary);

@@ -44,7 +44,10 @@ watch(
     deactivate = undefined;
     if (visible) {
       await nextTick();
-      if (cardRef.value) deactivate = activateModalLifecycle(cardRef.value, () => emit("cancel"));
+      if (cardRef.value)
+        deactivate = activateModalLifecycle(cardRef.value, () =>
+          emit("cancel"),
+        );
     }
   },
   { immediate: true },
@@ -61,7 +64,14 @@ onBeforeUnmount(() => deactivate?.());
         v-bind="$attrs"
         @click.self="emit('cancel')"
       >
-        <div ref="cardRef" class="sl-modal-card" role="alertdialog" aria-modal="true" :aria-labelledby="titleId" tabindex="-1">
+        <div
+          ref="cardRef"
+          class="sl-modal-card"
+          role="alertdialog"
+          aria-modal="true"
+          :aria-labelledby="titleId"
+          tabindex="-1"
+        >
           <div class="sl-modal-header" data-slot="header">
             <h3 :id="titleId" class="sl-modal-title">{{ title }}</h3>
           </div>
@@ -69,7 +79,11 @@ onBeforeUnmount(() => deactivate?.());
             <p class="sl-modal-message">{{ message }}</p>
           </div>
           <div class="sl-modal-footer" data-slot="footer">
-            <button type="button" class="sl-modal-btn is-cancel" @click="emit('cancel')">
+            <button
+              type="button"
+              class="sl-modal-btn is-cancel"
+              @click="emit('cancel')"
+            >
               {{ cancelText }}
             </button>
             <button

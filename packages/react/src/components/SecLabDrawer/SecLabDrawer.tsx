@@ -69,7 +69,9 @@ export const SecLabDrawer: React.FC<SecLabDrawerProps> = ({
       >
         {/* 头部标题栏 */}
         <div className="sl-drawer-header" data-slot="header">
-          <h3 id={titleId} className="sl-drawer-title">{title}</h3>
+          <h3 id={titleId} className="sl-drawer-title">
+            {title}
+          </h3>
           <button
             type="button"
             className="sl-drawer-close-btn"

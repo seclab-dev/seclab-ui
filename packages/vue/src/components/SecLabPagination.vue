@@ -88,23 +88,25 @@ function changePage(page: number | string) {
     >
       &lt;
     </button>
-    <template
-      v-for="(page, index) in pages"
-      :key="index"
-    >
-      <span v-if="typeof page === 'string'" class="sl-pagination-ellipsis" aria-hidden="true">…</span>
+    <template v-for="(page, index) in pages" :key="index">
+      <span
+        v-if="typeof page === 'string'"
+        class="sl-pagination-ellipsis"
+        aria-hidden="true"
+        >…</span
+      >
       <button
-      v-else
-      type="button"
-      class="sl-pagination-btn"
-      :class="{
-        active: page === currentPage,
-      }"
-      :aria-current="page === currentPage ? 'page' : undefined"
-      :aria-label="`Page ${page}`"
-      @click="changePage(page)"
-    >
-      {{ page }}
+        v-else
+        type="button"
+        class="sl-pagination-btn"
+        :class="{
+          active: page === currentPage,
+        }"
+        :aria-current="page === currentPage ? 'page' : undefined"
+        :aria-label="`Page ${page}`"
+        @click="changePage(page)"
+      >
+        {{ page }}
       </button>
     </template>
     <button
@@ -126,8 +128,15 @@ function changePage(page: number | string) {
   align-items: center;
   gap: var(--sdl-space-2);
 }
-.sl-pagination-ellipsis { min-width: 32px; text-align: center; color: var(--sdl-text-muted); }
-.sl-pagination-btn:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); }
+.sl-pagination-ellipsis {
+  min-width: 32px;
+  text-align: center;
+  color: var(--sdl-text-muted);
+}
+.sl-pagination-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--sdl-focus-ring);
+}
 
 .sl-pagination-btn {
   min-width: 32px;

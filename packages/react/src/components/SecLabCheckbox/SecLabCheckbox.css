@@ -74,6 +74,10 @@
 .sl-checkbox:hover:not(.is-disabled) .sl-checkbox-inner {
   border-color: var(--sdl-primary);
 }
+.sl-checkbox-original:focus-visible + .sl-checkbox-inner {
+  box-shadow: var(--sdl-focus-ring);
+  border-color: var(--sdl-primary);
+}
 
 .sl-checkbox-label {
   line-height: 1;

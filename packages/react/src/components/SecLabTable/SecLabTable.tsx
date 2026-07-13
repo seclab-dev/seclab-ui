@@ -19,7 +19,7 @@ export interface SecLabTableColumn<T = any> {
     column: SecLabTableColumn<T>,
     index: number,
   ) => React.ReactNode;
-  fixed?: string;
+  fixed?: "left" | "right";
 }
 
 export interface SecLabTableProps<
@@ -33,6 +33,7 @@ export interface SecLabTableProps<
   border?: boolean;
   /** 无数据时显示的占位文案 */
   emptyText?: string;
+  rowKey?: keyof T | ((row: T) => React.Key);
   /** 插槽映射 (对应 Vue 中的 scoped slots) */
   slots?: Record<
     string,
@@ -89,6 +90,7 @@ export function SecLabTable<T extends Record<string, any>>({
   columns,
   border = false,
   emptyText = "暂无数据",
+  rowKey,
   slots,
   headerSlots,
   emptySlot,
@@ -97,6 +99,37 @@ export function SecLabTable<T extends Record<string, any>>({
   className = "",
   ...rest
 }: SecLabTableProps<T>) {
+  const fixedOffset = (index: number, side: "left" | "right") => {
+    const range =
+      side === "left" ? columns.slice(0, index) : columns.slice(index + 1);
+    return range
+      .filter((column) => column.fixed === side)
+      .reduce(
+        (total, column) =>
+          total + (typeof column.width === "number" ? column.width : 0),
+        0,
+      );
+  };
+  const columnStyle = (
+    column: SecLabTableColumn<T>,
+    index: number,
+    header = false,
+  ): React.CSSProperties => {
+    const base = header ? getHeaderStyle(column) : getCellStyle(column);
+    return column.fixed
+      ? {
+          ...base,
+          position: "sticky",
+          [column.fixed]: fixedOffset(index, column.fixed),
+        }
+      : base;
+  };
+  const resolveRowKey = (row: T, index: number): React.Key =>
+    typeof rowKey === "function"
+      ? rowKey(row)
+      : rowKey
+        ? (row[rowKey] as React.Key)
+        : index;
   return (
     <div
       className={`sl-table-container ${border ? "sl-table-border" : ""} ${className}`.trim()}
@@ -113,7 +146,7 @@ export function SecLabTable<T extends Record<string, any>>({
                   <th
                     key={index}
                     className={`sl-table-header-cell ${isFixed}`.trim()}
-                    style={getHeaderStyle(col)}
+                    style={columnStyle(col, index, true)}
                   >
                     <div className="sl-cell">
                       {col.renderHeader
@@ -133,7 +166,7 @@ export function SecLabTable<T extends Record<string, any>>({
             {data.length > 0 ? (
               data.map((row, rowIndex) => (
                 <tr
-                  key={rowIndex}
+                  key={resolveRowKey(row, rowIndex)}
                   className="sl-table-row"
                   onMouseEnter={(event) =>
                     onRowMouseEnter?.(row, event, rowIndex)
@@ -148,7 +181,7 @@ export function SecLabTable<T extends Record<string, any>>({
                       <td
                         key={colIndex}
                         className={`sl-table-cell ${isFixed}`.trim()}
-                        style={getCellStyle(col)}
+                        style={columnStyle(col, colIndex)}
                       >
                         <div className="sl-cell">
                           {col.renderCell

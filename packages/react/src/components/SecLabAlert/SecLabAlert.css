@@ -49,6 +49,12 @@
   opacity: 1;
 }
 
+.sl-alert-close:focus-visible {
+  outline: none;
+  border-radius: var(--sdl-radius-xs);
+  box-shadow: var(--sdl-focus-ring);
+}
+
 /* --- 类型预设 (SDL 软色调) --- */
 .is-info {
   background-color: var(--sdl-info-soft);

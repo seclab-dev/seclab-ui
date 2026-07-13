@@ -29,3 +29,8 @@
   color: var(--sdl-text-muted);
   line-height: 1.4;
 }
+.sl-form-item-error {
+  margin-top: var(--sdl-space-1);
+  color: var(--sdl-danger);
+  font-size: var(--sdl-font-caption);
+}

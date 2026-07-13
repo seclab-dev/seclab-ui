@@ -34,13 +34,33 @@ export const SecLabTabs: React.FC<SecLabTabsProps> = ({
     onChange?.(tab.name);
     onTabChange?.(tab.name);
   };
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+  const handleKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const enabled = tabs.map((tab, tabIndex) => ({ tab, tabIndex })).filter(({ tab }) => !tab.disabled);
+    const enabled = tabs
+      .map((tab, tabIndex) => ({ tab, tabIndex }))
+      .filter(({ tab }) => !tab.disabled);
     const current = enabled.findIndex(({ tabIndex }) => tabIndex === index);
-    const target = event.key === "Home" ? enabled[0] : event.key === "End" ? enabled.at(-1) : enabled[(current + (event.key === "ArrowRight" ? 1 : -1) + enabled.length) % enabled.length];
-    if (target) { handleTabClick(target.tab); document.querySelector<HTMLElement>(`[data-tab-name="${target.tab.name}"]`)?.focus(); }
+    const target =
+      event.key === "Home"
+        ? enabled[0]
+        : event.key === "End"
+          ? enabled.at(-1)
+          : enabled[
+              (current +
+                (event.key === "ArrowRight" ? 1 : -1) +
+                enabled.length) %
+                enabled.length
+            ];
+    if (target) {
+      handleTabClick(target.tab);
+      document
+        .querySelector<HTMLElement>(`[data-tab-name="${target.tab.name}"]`)
+        ?.focus();
+    }
   };
 
   return (
