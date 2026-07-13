@@ -1,6 +1,6 @@
 name: Publish Packages
 
-run-name: "${{ inputs.package }} Version ${{ inputs.version }}"
+run-name: "${{ inputs.package }} ${{ inputs.version }} to GitHub Packages"
 
 on:
   workflow_dispatch:
@@ -17,13 +17,13 @@ on:
           - "@seclab-dev/vue"
           - "@seclab-dev/react"
       version:
-        description: Expected package SemVer
+        description: Package SemVer
         required: true
         default: 0.1.0-alpha.1
         type: string
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -32,6 +32,46 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Resolve release request
+        id: release
+        env:
+          RELEASE_PACKAGE: ${{ inputs.package }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        shell: bash
+        run: |
+          case "$RELEASE_PACKAGE" in
+            '@seclab-dev/tokens') TAG_PREFIX='tokens-' ;;
+            '@seclab-dev/icons') TAG_PREFIX='icons-' ;;
+            '@seclab-dev/suite-sdk') TAG_PREFIX='suite-sdk-' ;;
+            '@seclab-dev/vue') TAG_PREFIX='vue-' ;;
+            '@seclab-dev/react') TAG_PREFIX='react-' ;;
+            *) echo "Unsupported package: $RELEASE_PACKAGE"; exit 1 ;;
+          esac
+          echo "package=$RELEASE_PACKAGE" >> "$GITHUB_OUTPUT"
+          echo "version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG_PREFIX$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve release source
+        id: source
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        shell: bash
+        run: |
+          if git show-ref --verify --quiet "refs/tags/$RELEASE_TAG"; then
+            git checkout --detach "refs/tags/$RELEASE_TAG"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Reusing existing release tag: $RELEASE_TAG"
+          else
+            git fetch origin main
+            if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+              echo "New release tags must be created from the latest main commit"
+              exit 1
+            fi
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -47,15 +87,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run release quality checks
-        run: pnpm check
-
-      - name: Verify selected package version
+      - name: Verify release metadata
+        id: metadata
         env:
-          RELEASE_PACKAGE: ${{ inputs.package }}
-          RELEASE_VERSION: ${{ inputs.version }}
+          RELEASE_PACKAGE: ${{ steps.release.outputs.package }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
         shell: bash
         run: |
+          if ! node -e "const semver = require('semver'); process.exit(semver.valid(process.argv[1]) ? 0 : 1)" "$RELEASE_VERSION"; then
+            echo "Invalid SemVer in release tag: $RELEASE_TAG"
+            exit 1
+          fi
           ACTUAL_VERSION=$(node -e "
             const fs = require('node:fs')
             const paths = {
@@ -72,14 +115,7 @@ jobs:
             echo "$RELEASE_PACKAGE version is $ACTUAL_VERSION, expected $RELEASE_VERSION"
             exit 1
           fi
-
-      - name: Resolve npm dist-tag
-        id: release
-        env:
-          RELEASE_VERSION: ${{ inputs.version }}
-        shell: bash
-        run: |
-          TAG=$(node --input-type=module -e "
+          NPM_TAG=$(node --input-type=module -e "
             import semver from 'semver'
             const prerelease = semver.prerelease(process.env.RELEASE_VERSION)
             const prefix = prerelease?.[0]
@@ -90,13 +126,16 @@ jobs:
                 : 'latest'
             process.stdout.write(tag)
           ")
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "npm_tag=$NPM_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Run release quality checks
+        run: pnpm check
 
       - name: Reject existing versions
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_PACKAGE: ${{ inputs.package }}
-          RELEASE_VERSION: ${{ inputs.version }}
+          RELEASE_PACKAGE: ${{ steps.release.outputs.package }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
         shell: bash
         run: |
           if npm view "$RELEASE_PACKAGE@$RELEASE_VERSION" version --registry=https://npm.pkg.github.com >/dev/null 2>&1; then
@@ -105,10 +144,10 @@ jobs:
           fi
 
       - name: Verify framework package dependencies
-        if: inputs.package == '@seclab-dev/vue' || inputs.package == '@seclab-dev/react'
+        if: steps.release.outputs.package == '@seclab-dev/vue' || steps.release.outputs.package == '@seclab-dev/react'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_PACKAGE: ${{ inputs.package }}
+          RELEASE_PACKAGE: ${{ steps.release.outputs.package }}
         shell: bash
         run: |
           node --input-type=module <<'NODE' > /tmp/vue-dependencies.txt
@@ -138,11 +177,30 @@ jobs:
             fi
           done < /tmp/vue-dependencies.txt
 
+      - name: Ensure release tag
+        if: steps.source.outputs.exists != 'true'
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+        shell: bash
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            git fetch origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+            if [ "$(git rev-list -n 1 "$RELEASE_TAG")" != "$(git rev-parse HEAD)" ]; then
+              echo "Release tag already points to a different commit: $RELEASE_TAG"
+              exit 1
+            fi
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git tag --annotate "$RELEASE_TAG" --message "Release $RELEASE_TAG"
+          git push origin "refs/tags/$RELEASE_TAG"
+
       - name: Publish package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TAG: ${{ steps.release.outputs.tag }}
-          RELEASE_PACKAGE: ${{ inputs.package }}
+          NPM_TAG: ${{ steps.metadata.outputs.npm_tag }}
+          RELEASE_PACKAGE: ${{ steps.release.outputs.package }}
         shell: bash
         run: |
           pnpm --filter "$RELEASE_PACKAGE" publish --no-git-checks --access public --tag "$NPM_TAG"
