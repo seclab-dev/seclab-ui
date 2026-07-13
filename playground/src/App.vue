@@ -94,8 +94,8 @@ const tableColumns = [
 
 // Date picker states
 const rangeVal = ref({
-  startAt: Date.now() - 3600000, // 1 hour ago
-  endAt: Date.now(),
+  startAt: new Date(2025, 4, 20, 9, 30).getTime(),
+  endAt: new Date(2025, 4, 20, 10, 30).getTime(),
 });
 
 const shortcutOptions = [
