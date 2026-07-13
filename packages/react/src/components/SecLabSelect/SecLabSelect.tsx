@@ -5,6 +5,7 @@ import React, {
   useLayoutEffect,
   useMemo,
   useCallback,
+  useId,
 } from "react";
 import { createPortal } from "react-dom";
 import { computeFloatingPosition } from "../../internal/floating-position";
@@ -65,6 +66,8 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
   });
   const selectRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const listboxId = useId();
 
   const selectedLabel = useMemo(() => {
     const selectedOption = options.find((opt) => opt.value === value);
@@ -115,7 +118,48 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
 
   const toggleDropdown = () => {
     if (disabled) return;
-    setIsOpen((prev) => !prev);
+    setIsOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        const selected = options.findIndex((option) => option.value === value && !option.disabled);
+        setActiveIndex(selected >= 0 ? selected : options.findIndex((option) => !option.disabled));
+      }
+      return next;
+    });
+  };
+
+  const moveActive = (direction: 1 | -1) => {
+    if (!options.length) return;
+    let next = activeIndex;
+    for (let count = 0; count < options.length; count += 1) {
+      next = (next + direction + options.length) % options.length;
+      if (!options[next]?.disabled) {
+        setActiveIndex(next);
+        requestAnimationFrame(() => dropdownRef.current?.querySelector<HTMLElement>(`[data-option-index="${next}"]`)?.scrollIntoView({ block: "nearest" }));
+        return;
+      }
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (disabled) return;
+    if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+      event.preventDefault();
+      if (!isOpen) toggleDropdown();
+      if (event.key === "ArrowDown") moveActive(1);
+      else if (event.key === "ArrowUp") moveActive(-1);
+      else {
+        const indexes = options.map((option, index) => ({ option, index })).filter(({ option }) => !option.disabled);
+        setActiveIndex(event.key === "Home" ? (indexes[0]?.index ?? -1) : (indexes.at(-1)?.index ?? -1));
+      }
+    } else if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      if (!isOpen) toggleDropdown();
+      else if (activeIndex >= 0 && options[activeIndex]) selectOption(options[activeIndex]);
+    } else if (event.key === "Escape" && isOpen) {
+      event.preventDefault();
+      setIsOpen(false);
+    }
   };
 
   const selectOption = (option: SecLabSelectOption) => {
@@ -145,7 +189,7 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
       ref={selectRef}
       {...rest}
     >
-      <div className="sl-select-trigger" onClick={toggleDropdown}>
+      <div className="sl-select-trigger" role="combobox" tabIndex={disabled ? -1 : 0} aria-expanded={isOpen} aria-controls={listboxId} aria-haspopup="listbox" onClick={toggleDropdown} onKeyDown={handleKeyDown}>
         <span className="sl-select-label">{selectedLabel}</span>
         <span className="sl-select-arrow"></span>
       </div>
@@ -154,17 +198,24 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
         createPortal(
           <ul
             ref={dropdownRef}
+            id={listboxId}
+            role="listbox"
             className="sl-select-options"
             style={dropdownStyle}
             data-placement={dropdownPlacement}
             onScroll={handleDropdownScroll}
           >
-            {options.map((option) => {
+            {options.map((option, index) => {
               const isSelected = value === option.value;
               return (
                 <li
                   key={option.value}
                   className={`sl-select-option ${isSelected ? "selected" : ""} ${option.disabled ? "disabled" : ""}`.trim()}
+                  role="option"
+                  aria-selected={isSelected}
+                  aria-disabled={option.disabled || undefined}
+                  data-option-index={index}
+                  data-active={activeIndex === index || undefined}
                   title={option.hint}
                   onClick={() => selectOption(option)}
                 >

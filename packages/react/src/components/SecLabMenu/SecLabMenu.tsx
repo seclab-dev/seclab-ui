@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import "./SecLabMenu.css";
 
 export interface MenuItem {
@@ -34,13 +34,21 @@ export const SecLabMenu: React.FC<SecLabMenuProps> = ({
   className = "",
   ...rest
 }) => {
+  const menuRef = useRef<HTMLElement>(null);
   const handleSelect = (key: string) => {
     onChange?.(key);
     onSelect?.(key);
   };
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+    const buttons = [...(menuRef.current?.querySelectorAll<HTMLButtonElement>(".sl-menu-item-button") ?? [])];
+    const current = buttons.indexOf(document.activeElement as HTMLButtonElement);
+    const index = event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1 : (current + (event.key === "ArrowDown" ? 1 : -1) + buttons.length) % buttons.length;
+    event.preventDefault(); buttons[index]?.focus();
+  };
 
   return (
-    <nav className={`sl-menu ${className}`.trim()} role="menu" {...rest}>
+    <nav ref={menuRef} className={`sl-menu ${className}`.trim()} aria-label="Menu" onKeyDown={handleKeyDown} {...rest}>
       {items.map((category) => (
         <div key={category.key} className="sl-menu-group">
           <div className="sl-menu-group-title">{category.label}</div>
@@ -49,10 +57,10 @@ export const SecLabMenu: React.FC<SecLabMenuProps> = ({
               <li
                 key={item.key}
                 className={`sl-menu-item ${value === item.key ? "is-active" : ""}`.trim()}
-                role="menuitem"
-                onClick={() => handleSelect(item.key)}
               >
-                <span className="sl-menu-item-label">{item.label}</span>
+                <button type="button" className="sl-menu-item-button" aria-current={value === item.key ? "page" : undefined} onClick={() => handleSelect(item.key)}>
+                  <span className="sl-menu-item-label">{item.label}</span>
+                </button>
               </li>
             ))}
           </ul>

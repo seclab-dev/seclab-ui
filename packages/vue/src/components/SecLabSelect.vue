@@ -37,6 +37,8 @@ const isOpen = ref(false);
 const selectRef = ref<HTMLElement | null>(null);
 const dropdownRef = ref<HTMLElement | null>(null);
 const dropdownPlacement = ref<"top" | "bottom">("bottom");
+const activeIndex = ref(-1);
+const listboxId = `sl-select-listbox-${Math.random().toString(36).slice(2)}`;
 const dropdownStyle = ref<Record<string, string>>({
   visibility: "hidden",
 });
@@ -78,6 +80,10 @@ watch(
 function toggleDropdown() {
   if (props.disabled) return;
   isOpen.value = !isOpen.value;
+  if (isOpen.value) {
+    const selected = props.options.findIndex((option) => option.value === props.modelValue && !option.disabled);
+    activeIndex.value = selected >= 0 ? selected : props.options.findIndex((option) => !option.disabled);
+  }
 }
 
 function selectOption(option: Option) {
@@ -88,6 +94,40 @@ function selectOption(option: Option) {
   }
   emit("update:modelValue", option.value);
   isOpen.value = false;
+}
+
+function moveActive(direction: 1 | -1) {
+  if (!props.options.length) return;
+  let next = activeIndex.value;
+  for (let count = 0; count < props.options.length; count += 1) {
+    next = (next + direction + props.options.length) % props.options.length;
+    if (!props.options[next]?.disabled) {
+      activeIndex.value = next;
+      nextTick(() => dropdownRef.value?.querySelector<HTMLElement>(`[data-option-index="${next}"]`)?.scrollIntoView({ block: "nearest" }));
+      return;
+    }
+  }
+}
+
+function handleKeydown(event: KeyboardEvent) {
+  if (props.disabled) return;
+  if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+    event.preventDefault();
+    if (!isOpen.value) toggleDropdown();
+    if (event.key === "ArrowDown") moveActive(1);
+    else if (event.key === "ArrowUp") moveActive(-1);
+    else {
+      const indexes = props.options.map((option, index) => ({ option, index })).filter(({ option }) => !option.disabled);
+      activeIndex.value = event.key === "Home" ? (indexes[0]?.index ?? -1) : (indexes.at(-1)?.index ?? -1);
+    }
+  } else if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    if (!isOpen.value) toggleDropdown();
+    else if (activeIndex.value >= 0) selectOption(props.options[activeIndex.value]);
+  } else if (event.key === "Escape" && isOpen.value) {
+    event.preventDefault();
+    isOpen.value = false;
+  }
 }
 
 function handleDropdownScroll(event: Event) {
@@ -133,7 +173,7 @@ onUnmounted(() => {
     :class="{ 'is-open': isOpen, 'is-disabled': disabled }"
     ref="selectRef"
   >
-    <div class="sl-select-trigger" @click="toggleDropdown">
+    <div class="sl-select-trigger" role="combobox" tabindex="0" :aria-expanded="isOpen" :aria-controls="listboxId" aria-haspopup="listbox" @click="toggleDropdown" @keydown="handleKeydown">
       <span class="sl-select-label">{{ selectedLabel }}</span>
       <span class="sl-select-arrow"></span>
     </div>
@@ -143,16 +183,23 @@ onUnmounted(() => {
           v-if="isOpen"
           ref="dropdownRef"
           class="sl-select-options"
+          :id="listboxId"
+          role="listbox"
           :style="dropdownStyle"
           :data-placement="dropdownPlacement"
           @scroll="handleDropdownScroll"
         >
           <li
-            v-for="option in options"
+            v-for="(option, index) in options"
             :key="option.value"
             class="sl-select-option"
+            role="option"
+            :aria-selected="modelValue === option.value"
+            :aria-disabled="option.disabled || undefined"
+            :data-option-index="index"
             :class="{
               selected: modelValue === option.value,
+              active: activeIndex === index,
               disabled: option.disabled,
             }"
             :title="option.hint"
@@ -250,6 +297,8 @@ onUnmounted(() => {
   background-color: var(--sdl-bg-hover);
   color: var(--sdl-text-primary);
 }
+.sl-select-option.active { background-color: var(--sdl-bg-hover); }
+.sl-select-trigger:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); border-color: var(--sdl-primary); }
 
 .sl-select-option.selected {
   background-color: var(--sdl-bg-active);

@@ -78,6 +78,8 @@
   background-color: var(--sdl-bg-hover);
   color: var(--sdl-text-primary);
 }
+.sl-select-option[data-active="true"] { background-color: var(--sdl-bg-hover); }
+.sl-select-trigger:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); border-color: var(--sdl-primary); }
 
 .sl-select-option.selected {
   background-color: var(--sdl-bg-active);

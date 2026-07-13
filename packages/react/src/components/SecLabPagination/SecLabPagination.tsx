@@ -10,6 +10,9 @@ export interface SecLabPaginationProps extends React.HTMLAttributes<HTMLDivEleme
   maxVisibleButtons?: number;
   /** 页码改变时的回调 */
   onPageChange?: (page: number) => void;
+  ariaLabel?: string;
+  previousLabel?: string;
+  nextLabel?: string;
 }
 
 export const SecLabPagination: React.FC<SecLabPaginationProps> = ({
@@ -17,6 +20,9 @@ export const SecLabPagination: React.FC<SecLabPaginationProps> = ({
   totalPages,
   maxVisibleButtons = 5,
   onPageChange,
+  ariaLabel = "Pagination",
+  previousLabel = "Previous page",
+  nextLabel = "Next page",
   className = "",
   ...rest
 }) => {
@@ -73,12 +79,13 @@ export const SecLabPagination: React.FC<SecLabPaginationProps> = ({
   };
 
   return (
-    <div className={`sl-pagination ${className}`.trim()} {...rest}>
+    <nav className={`sl-pagination ${className}`.trim()} aria-label={ariaLabel} {...rest}>
       <button
         type="button"
         className="sl-pagination-btn"
         onClick={() => changePage(currentPage - 1)}
         disabled={currentPage === 1}
+        aria-label={previousLabel}
       >
         &lt;
       </button>
@@ -86,13 +93,16 @@ export const SecLabPagination: React.FC<SecLabPaginationProps> = ({
       {pages.map((page, index) => {
         const isActive = page === currentPage;
         const isEllipsis = typeof page === "string";
-        return (
+        return isEllipsis ? (
+          <span key={index} className="sl-pagination-ellipsis" aria-hidden="true">…</span>
+        ) : (
           <button
             key={index}
             type="button"
             className={`sl-pagination-btn ${isActive ? "active" : ""} ${isEllipsis ? "ellipsis" : ""}`.trim()}
             onClick={() => changePage(page)}
-            disabled={isEllipsis}
+            aria-current={isActive ? "page" : undefined}
+            aria-label={`Page ${page}`}
           >
             {page}
           </button>
@@ -104,9 +114,10 @@ export const SecLabPagination: React.FC<SecLabPaginationProps> = ({
         className="sl-pagination-btn"
         onClick={() => changePage(currentPage + 1)}
         disabled={currentPage === totalPages}
+        aria-label={nextLabel}
       >
         &gt;
       </button>
-    </div>
+    </nav>
   );
 };

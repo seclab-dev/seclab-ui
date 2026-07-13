@@ -19,6 +19,9 @@ const props = defineProps({
     type: Number,
     default: 5,
   },
+  ariaLabel: { type: String, default: "Pagination" },
+  previousLabel: { type: String, default: "Previous page" },
+  nextLabel: { type: String, default: "Next page" },
 });
 
 const emit = defineEmits(["page-change"]);
@@ -75,35 +78,45 @@ function changePage(page: number | string) {
 </script>
 
 <template>
-  <div class="sl-pagination" v-if="totalPages > 1">
+  <nav class="sl-pagination" v-if="totalPages > 1" :aria-label="ariaLabel">
     <button
       class="sl-pagination-btn"
+      type="button"
+      :aria-label="previousLabel"
       @click="changePage(currentPage - 1)"
       :disabled="currentPage === 1"
     >
       &lt;
     </button>
-    <button
+    <template
       v-for="(page, index) in pages"
       :key="index"
+    >
+      <span v-if="typeof page === 'string'" class="sl-pagination-ellipsis" aria-hidden="true">…</span>
+      <button
+      v-else
+      type="button"
       class="sl-pagination-btn"
       :class="{
         active: page === currentPage,
-        ellipsis: typeof page === 'string',
       }"
+      :aria-current="page === currentPage ? 'page' : undefined"
+      :aria-label="`Page ${page}`"
       @click="changePage(page)"
-      :disabled="typeof page === 'string'"
     >
       {{ page }}
-    </button>
+      </button>
+    </template>
     <button
       class="sl-pagination-btn"
+      type="button"
+      :aria-label="nextLabel"
       @click="changePage(currentPage + 1)"
       :disabled="currentPage === totalPages"
     >
       &gt;
     </button>
-  </div>
+  </nav>
 </template>
 
 <style scoped>
@@ -113,6 +126,8 @@ function changePage(page: number | string) {
   align-items: center;
   gap: var(--sdl-space-2);
 }
+.sl-pagination-ellipsis { min-width: 32px; text-align: center; color: var(--sdl-text-muted); }
+.sl-pagination-btn:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); }
 
 .sl-pagination-btn {
   min-width: 32px;

@@ -23,6 +23,7 @@
   background-color: var(--sdl-bg-hover);
   border-color: var(--sdl-border-brand);
 }
+.sl-action-btn:focus-visible, .sl-dropdown-item:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); }
 
 .sl-action-btn:disabled {
   opacity: 0.5;

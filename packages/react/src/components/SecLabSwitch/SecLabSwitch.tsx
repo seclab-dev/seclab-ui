@@ -2,8 +2,8 @@ import React from "react";
 import "./SecLabSwitch.css";
 
 export interface SecLabSwitchProps extends Omit<
-  React.HTMLAttributes<HTMLDivElement>,
-  "onChange"
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  "onChange" | "value"
 > {
   value: boolean;
   onChange?: (value: boolean) => void;
@@ -25,15 +25,19 @@ export const SecLabSwitch: React.FC<SecLabSwitchProps> = ({
   };
 
   return (
-    <div
+    <button
+      type="button"
       className={`sl-switch ${value ? "is-active" : ""} ${disabled ? "is-disabled" : ""} ${className}`.trim()}
       onClick={toggle}
+      role="switch"
+      aria-checked={value}
+      disabled={disabled}
       {...rest}
     >
       <div className="sl-switch-track">
         <div className="sl-switch-handle" />
       </div>
       {activeText && <span className="sl-switch-label">{activeText}</span>}
-    </div>
+    </button>
   );
 };

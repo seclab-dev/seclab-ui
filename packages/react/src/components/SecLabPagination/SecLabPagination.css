@@ -20,6 +20,8 @@
   align-items: center;
   justify-content: center;
 }
+.sl-pagination-ellipsis { min-width: 32px; text-align: center; color: var(--sdl-text-muted); }
+.sl-pagination-btn:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); }
 
 .sl-pagination-btn:hover:not(:disabled) {
   background-color: var(--sdl-bg-hover);

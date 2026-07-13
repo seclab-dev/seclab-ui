@@ -4,7 +4,12 @@
   cursor: pointer;
   user-select: none;
   gap: var(--sdl-space-2);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
 }
+.sl-switch:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); border-radius: var(--sdl-radius-pill); }
 
 .sl-switch.is-disabled {
   cursor: not-allowed;

@@ -17,7 +17,7 @@ interface Props {
   tabs: TabItem[];
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: string): void;
@@ -29,13 +29,22 @@ function handleTabClick(tab: TabItem) {
   emit("update:modelValue", tab.name);
   emit("tab-change", tab.name);
 }
+function handleKeydown(event: KeyboardEvent, index: number) {
+  if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+  event.preventDefault();
+  const enabled = props.tabs.map((tab, tabIndex) => ({ tab, tabIndex })).filter(({ tab }) => !tab.disabled);
+  const current = enabled.findIndex(({ tabIndex }) => tabIndex === index);
+  const target = event.key === "Home" ? enabled[0] : event.key === "End" ? enabled.at(-1) : enabled[(current + (event.key === "ArrowRight" ? 1 : -1) + enabled.length) % enabled.length];
+  if (target) { handleTabClick(target.tab); document.querySelector<HTMLElement>(`[data-tab-name="${target.tab.name}"]`)?.focus(); }
+}
 </script>
 
 <template>
   <div class="sl-tabs">
     <div class="sl-tabs-nav" role="tablist">
-      <div
-        v-for="tab in tabs"
+      <button
+        v-for="(tab, index) in tabs"
+        type="button"
         :key="tab.name"
         class="sl-tabs-item"
         :class="{
@@ -44,10 +53,14 @@ function handleTabClick(tab: TabItem) {
         }"
         role="tab"
         :aria-selected="modelValue === tab.name"
+        :tabindex="modelValue === tab.name ? 0 : -1"
+        :disabled="tab.disabled"
+        :data-tab-name="tab.name"
         @click="handleTabClick(tab)"
+        @keydown="handleKeydown($event, index)"
       >
         {{ tab.label }}
-      </div>
+      </button>
     </div>
   </div>
 </template>
@@ -77,7 +90,11 @@ function handleTabClick(tab: TabItem) {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   user-select: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
+.sl-tabs-item:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); }
 
 .sl-tabs-item:hover:not(.is-disabled) {
   color: var(--sdl-text-primary);

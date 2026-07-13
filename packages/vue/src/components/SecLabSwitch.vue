@@ -32,16 +32,20 @@ function toggle() {
 </script>
 
 <template>
-  <div
+  <button
+    type="button"
     class="sl-switch"
     :class="{ 'is-active': modelValue, 'is-disabled': disabled }"
     @click="toggle"
+    role="switch"
+    :aria-checked="modelValue"
+    :disabled="disabled"
   >
     <div class="sl-switch-track">
       <div class="sl-switch-handle"></div>
     </div>
     <span v-if="activeText" class="sl-switch-label">{{ activeText }}</span>
-  </div>
+  </button>
 </template>
 
 <style scoped>
@@ -51,7 +55,12 @@ function toggle() {
   cursor: pointer;
   user-select: none;
   gap: var(--sdl-space-2);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
 }
+.sl-switch:focus-visible { outline: none; box-shadow: var(--sdl-focus-ring); border-radius: var(--sdl-radius-pill); }
 
 .sl-switch.is-disabled {
   cursor: not-allowed;

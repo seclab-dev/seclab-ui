@@ -94,6 +94,21 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
     action.handler();
     setShowMenu(false);
   };
+  const focusItem = (index: number) => {
+    const items = [...(dropdownRef.current?.querySelectorAll<HTMLButtonElement>(".sl-dropdown-item:not(:disabled)") ?? [])];
+    items[(index + items.length) % items.length]?.focus();
+  };
+  const handleTriggerKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (!["Enter", " ", "ArrowDown"].includes(event.key)) return;
+    event.preventDefault(); setShowMenu(true); requestAnimationFrame(() => { updateDropdownPosition(); focusItem(0); });
+  };
+  const handleMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const items = [...(dropdownRef.current?.querySelectorAll<HTMLButtonElement>(".sl-dropdown-item:not(:disabled)") ?? [])];
+    const index = items.indexOf(document.activeElement as HTMLButtonElement);
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") { event.preventDefault(); focusItem(index + (event.key === "ArrowDown" ? 1 : -1)); }
+    else if (event.key === "Home" || event.key === "End") { event.preventDefault(); focusItem(event.key === "Home" ? 0 : items.length - 1); }
+    else if (event.key === "Escape") { event.preventDefault(); setShowMenu(false); menuRef.current?.querySelector<HTMLButtonElement>(".sl-action-btn")?.focus(); }
+  };
 
   return (
     <div
@@ -106,6 +121,9 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
         className="sl-action-btn"
         disabled={disabled}
         onClick={toggleMenu}
+        onKeyDown={handleTriggerKeyDown}
+        aria-haspopup="menu"
+        aria-expanded={showMenu}
       >
         <SecLabIcon className="sl-action-btn-icon" name="settings" size={16} />
         <span className="sl-action-btn-text">{label}</span>
@@ -116,9 +134,11 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
           <div
             ref={dropdownRef}
             className="sl-dropdown"
+            role="menu"
             style={dropdownStyle}
             data-placement={dropdownPlacement}
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={handleMenuKeyDown}
           >
             {actions.map((action, index) => {
               const itemClass = (action.className || action.class || "").trim();
@@ -128,6 +148,7 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
                   type="button"
                   className={`sl-dropdown-item ${itemClass} ${isDisabled ? "is-disabled" : ""}`.trim()}
                   disabled={isDisabled}
+                  role="menuitem"
                   onClick={(e) => handleActionClick(action, e)}
                 >
                   <SecLabIcon
