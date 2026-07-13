@@ -49,12 +49,11 @@
 }
 
 .sl-select-options {
-  position: absolute;
+  position: fixed;
   background-color: var(--sdl-bg-panel);
   border: 1px solid var(--sdl-border-strong);
   border-radius: var(--sdl-radius-md);
   box-shadow: var(--sdl-shadow-panel);
-  max-height: 260px;
   width: max-content;
   overflow-y: auto;
   box-sizing: border-box;

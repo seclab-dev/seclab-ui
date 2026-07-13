@@ -1127,6 +1127,33 @@ function App() {
           </div>
         </section>
       </main>
+      <div
+        data-ui="select-viewport-edge-demo"
+        style={{
+          position: "fixed",
+          right: "16px",
+          bottom: "16px",
+          zIndex: "var(--sdl-z-index-popover)",
+          display: "grid",
+          gridTemplateColumns: "auto 180px",
+          alignItems: "center",
+          gap: "8px",
+          padding: "8px",
+          border: "1px solid var(--sdl-border-default)",
+          borderRadius: "var(--sdl-radius-md)",
+          background: "var(--sdl-bg-panel)",
+          boxShadow: "var(--sdl-shadow-panel)",
+          color: "var(--sdl-text-secondary)",
+          fontSize: "var(--sdl-font-body-sm)",
+        }}
+      >
+        <span>每页显示</span>
+        <SecLabSelect
+          value={selectVal}
+          options={selectOptions}
+          onChange={(value) => setSelectVal(value as string)}
+        />
+      </div>
     </div>
   );
 }

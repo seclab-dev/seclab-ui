@@ -1007,6 +1007,10 @@ function toggleTheme() {
         </div>
       </section>
     </main>
+    <div class="viewport-edge-select" data-ui="select-viewport-edge-demo">
+      <span>每页显示</span>
+      <SecLabSelect v-model="selectVal" :options="selectOptions" />
+    </div>
   </div>
 </template>
 
@@ -1125,5 +1129,23 @@ body,
   color: var(--sdl-text-muted);
   text-align: center;
   word-break: break-all;
+}
+
+.viewport-edge-select {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: var(--sdl-z-index-popover);
+  display: grid;
+  grid-template-columns: auto 180px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--sdl-border-default);
+  border-radius: var(--sdl-radius-md);
+  background: var(--sdl-bg-panel);
+  box-shadow: var(--sdl-shadow-panel);
+  color: var(--sdl-text-secondary);
+  font-size: var(--sdl-font-body-sm);
 }
 </style>

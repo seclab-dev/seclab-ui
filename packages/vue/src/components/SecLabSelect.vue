@@ -32,9 +32,16 @@ const emit = defineEmits<{
 }>();
 
 const SCROLL_BOTTOM_THRESHOLD = 24;
+const DROPDOWN_GAP = 4;
+const DROPDOWN_MAX_HEIGHT = 260;
+const VIEWPORT_MARGIN = 8;
 const isOpen = ref(false);
 const selectRef = ref<HTMLElement | null>(null);
-const dropdownStyle = ref({});
+const dropdownRef = ref<HTMLElement | null>(null);
+const dropdownPlacement = ref<"top" | "bottom">("bottom");
+const dropdownStyle = ref<Record<string, string>>({
+  visibility: "hidden",
+});
 
 const selectedLabel = computed(() => {
   const selectedOption = props.options.find(
@@ -44,22 +51,63 @@ const selectedLabel = computed(() => {
 });
 
 const calculatePosition = () => {
-  if (!selectRef.value || !isOpen.value) return;
+  if (!selectRef.value || !dropdownRef.value || !isOpen.value) return;
   const rect = selectRef.value.getBoundingClientRect();
+  const dropdown = dropdownRef.value;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const availableBelow = Math.max(
+    0,
+    viewportHeight - rect.bottom - DROPDOWN_GAP - VIEWPORT_MARGIN,
+  );
+  const availableAbove = Math.max(
+    0,
+    rect.top - DROPDOWN_GAP - VIEWPORT_MARGIN,
+  );
+  const desiredHeight = Math.min(dropdown.scrollHeight, DROPDOWN_MAX_HEIGHT);
+  const openAbove =
+    availableBelow < desiredHeight && availableAbove > availableBelow;
+  const availableHeight = openAbove ? availableAbove : availableBelow;
+  const maxHeight = Math.min(DROPDOWN_MAX_HEIGHT, availableHeight);
+  const maxWidth = Math.max(0, viewportWidth - VIEWPORT_MARGIN * 2);
+  const dropdownWidth = Math.min(
+    Math.max(dropdown.scrollWidth, rect.width),
+    maxWidth,
+  );
+  const left = Math.min(
+    Math.max(rect.left, VIEWPORT_MARGIN),
+    Math.max(VIEWPORT_MARGIN, viewportWidth - VIEWPORT_MARGIN - dropdownWidth),
+  );
+
+  dropdownPlacement.value = openAbove ? "top" : "bottom";
   dropdownStyle.value = {
     minWidth: `${rect.width}px`,
-    top: `${rect.bottom + window.scrollY + 4}px`,
-    left: `${rect.left + window.scrollX}px`,
+    maxWidth: `${maxWidth}px`,
+    maxHeight: `${maxHeight}px`,
+    left: `${left}px`,
+    top: openAbove ? "auto" : `${rect.bottom + DROPDOWN_GAP}px`,
+    bottom: openAbove
+      ? `${viewportHeight - rect.top + DROPDOWN_GAP}px`
+      : "auto",
+    visibility: "visible",
   };
 };
 
 watch(isOpen, (val) => {
   if (val) {
+    dropdownStyle.value = { visibility: "hidden" };
     nextTick(() => {
       calculatePosition();
     });
   }
 });
+
+watch(
+  () => props.options.length,
+  () => {
+    if (isOpen.value) nextTick(calculatePosition);
+  },
+);
 
 function toggleDropdown() {
   if (props.disabled) return;
@@ -90,7 +138,12 @@ function handleDropdownScroll(event: Event) {
 }
 
 function handleClickOutside(event: MouseEvent) {
-  if (selectRef.value && !selectRef.value.contains(event.target as Node)) {
+  const target = event.target as Node;
+  if (
+    selectRef.value &&
+    !selectRef.value.contains(target) &&
+    (!dropdownRef.value || !dropdownRef.value.contains(target))
+  ) {
     isOpen.value = false;
   }
 }
@@ -122,8 +175,10 @@ onUnmounted(() => {
       <Transition name="sl-select-fade">
         <ul
           v-if="isOpen"
+          ref="dropdownRef"
           class="sl-select-options"
           :style="dropdownStyle"
+          :data-placement="dropdownPlacement"
           @scroll="handleDropdownScroll"
         >
           <li
@@ -200,12 +255,11 @@ onUnmounted(() => {
 }
 
 .sl-select-options {
-  position: absolute;
+  position: fixed;
   background-color: var(--sdl-bg-panel);
   border: 1px solid var(--sdl-border-strong);
   border-radius: var(--sdl-radius-md);
   box-shadow: var(--sdl-shadow-panel);
-  max-height: 260px;
   width: max-content;
   overflow-y: auto;
   box-sizing: border-box;

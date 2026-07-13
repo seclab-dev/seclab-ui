@@ -2,6 +2,7 @@ import React, {
   useState,
   useRef,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useCallback,
 } from "react";
@@ -40,6 +41,9 @@ export interface SecLabSelectProps extends Omit<
 }
 
 const SCROLL_BOTTOM_THRESHOLD = 24;
+const DROPDOWN_GAP = 4;
+const DROPDOWN_MAX_HEIGHT = 260;
+const VIEWPORT_MARGIN = 8;
 
 export const SecLabSelect: React.FC<SecLabSelectProps> = ({
   value,
@@ -55,8 +59,14 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
   ...rest
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+  const [dropdownPlacement, setDropdownPlacement] = useState<
+    "top" | "bottom"
+  >("bottom");
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({
+    visibility: "hidden",
+  });
   const selectRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLUListElement>(null);
 
   const selectedLabel = useMemo(() => {
     const selectedOption = options.find((opt) => opt.value === value);
@@ -64,27 +74,69 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
   }, [value, options, placeholder]);
 
   const calculatePosition = useCallback(() => {
-    if (!selectRef.current || !isOpen) return;
+    if (!selectRef.current || !dropdownRef.current || !isOpen) return;
     const rect = selectRef.current.getBoundingClientRect();
+    const dropdown = dropdownRef.current;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const availableBelow = Math.max(
+      0,
+      viewportHeight - rect.bottom - DROPDOWN_GAP - VIEWPORT_MARGIN,
+    );
+    const availableAbove = Math.max(
+      0,
+      rect.top - DROPDOWN_GAP - VIEWPORT_MARGIN,
+    );
+    const desiredHeight = Math.min(
+      dropdown.scrollHeight,
+      DROPDOWN_MAX_HEIGHT,
+    );
+    const openAbove =
+      availableBelow < desiredHeight && availableAbove > availableBelow;
+    const availableHeight = openAbove ? availableAbove : availableBelow;
+    const maxWidth = Math.max(0, viewportWidth - VIEWPORT_MARGIN * 2);
+    const dropdownWidth = Math.min(
+      Math.max(dropdown.scrollWidth, rect.width),
+      maxWidth,
+    );
+    const left = Math.min(
+      Math.max(rect.left, VIEWPORT_MARGIN),
+      Math.max(
+        VIEWPORT_MARGIN,
+        viewportWidth - VIEWPORT_MARGIN - dropdownWidth,
+      ),
+    );
+
+    setDropdownPlacement(openAbove ? "top" : "bottom");
     setDropdownStyle({
       minWidth: `${rect.width}px`,
-      top: `${rect.bottom + window.scrollY + 4}px`,
-      left: `${rect.left + window.scrollX}px`,
-      position: "absolute",
+      maxWidth: `${maxWidth}px`,
+      maxHeight: `${Math.min(DROPDOWN_MAX_HEIGHT, availableHeight)}px`,
+      left: `${left}px`,
+      top: openAbove ? "auto" : `${rect.bottom + DROPDOWN_GAP}px`,
+      bottom: openAbove
+        ? `${viewportHeight - rect.top + DROPDOWN_GAP}px`
+        : "auto",
+      position: "fixed",
+      visibility: "visible",
     });
   }, [isOpen]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isOpen) {
       calculatePosition();
+    } else {
+      setDropdownStyle({ visibility: "hidden" });
     }
-  }, [isOpen, calculatePosition]);
+  }, [isOpen, calculatePosition, options.length, dropdownFooter]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         selectRef.current &&
-        !selectRef.current.contains(event.target as Node)
+        !selectRef.current.contains(event.target as Node) &&
+        (!dropdownRef.current ||
+          !dropdownRef.current.contains(event.target as Node))
       ) {
         setIsOpen(false);
       }
@@ -141,8 +193,10 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
       {isOpen &&
         createPortal(
           <ul
+            ref={dropdownRef}
             className="sl-select-options"
             style={dropdownStyle}
+            data-placement={dropdownPlacement}
             onScroll={handleDropdownScroll}
           >
             {options.map((option) => {
