@@ -502,7 +502,11 @@ function toggleTheme() {
             >文字提示 (Tooltip)</label
           >
           <div class="row">
-            <SecLabTooltip text="这里是上方的提示内容" position="top">
+            <SecLabTooltip
+              data-ui="qa-tooltip"
+              text="这里是上方的提示内容"
+              position="top"
+            >
               <SecLabButton size="small">上方提示</SecLabButton>
             </SecLabTooltip>
             <SecLabTooltip text="这里是下方的提示内容" position="bottom">
@@ -608,10 +612,18 @@ function toggleTheme() {
           "
         >
           <div style="flex: 1; max-width: 500px">
-            <SecLabTabs v-model="activeTab" :tabs="tabsList" />
+            <SecLabTabs
+              data-ui="qa-tabs"
+              v-model="activeTab"
+              :tabs="tabsList"
+            />
           </div>
           <div>
-            <SecLabActionMenu :actions="actionsList" label="管理操作" />
+            <SecLabActionMenu
+              data-ui="qa-action-menu"
+              :actions="actionsList"
+              label="管理操作"
+            />
           </div>
         </div>
 
@@ -645,7 +657,11 @@ function toggleTheme() {
               padding: 12px;
             "
           >
-            <SecLabMenu v-model="activeMenu" :items="menuItems" />
+            <SecLabMenu
+              data-ui="qa-menu"
+              v-model="activeMenu"
+              :items="menuItems"
+            />
           </div>
 
           <!-- Descriptions & Form demo on right -->
@@ -669,9 +685,11 @@ function toggleTheme() {
             <SecLabCard shadow="never" style="padding: 16px">
               <template #header>表单项配置 (FormItem)</template>
               <SecLabFormItem
+                data-ui="qa-form-error"
                 label="目标节点地址"
                 required
                 hint="请填写合法的 IPv4/IPv6 节点通信地址"
+                error="示例错误：请输入合法的节点地址"
               >
                 <SecLabInput
                   v-model="textVal"
@@ -693,10 +711,16 @@ function toggleTheme() {
       <section class="card">
         <h3>Overlays & Popups 弹窗、抽屉与模态框</h3>
         <div class="row">
-          <SecLabButton type="primary" @click="dialogVisible = true"
+          <SecLabButton
+            data-ui="qa-open-dialog"
+            type="primary"
+            @click="dialogVisible = true"
             >打开对话框 (Dialog)</SecLabButton
           >
-          <SecLabButton type="secondary" @click="drawerVisible = true"
+          <SecLabButton
+            data-ui="qa-open-drawer"
+            type="secondary"
+            @click="drawerVisible = true"
             >打开右侧抽屉 (Drawer)</SecLabButton
           >
           <SecLabButton type="danger" @click="modalVisible = true"
@@ -706,6 +730,7 @@ function toggleTheme() {
 
         <!-- Dialog demonstration -->
         <SecLabDialog
+          data-ui="qa-dialog"
           :visible="dialogVisible"
           title="安全审计详情"
           width="550px"
@@ -744,6 +769,7 @@ function toggleTheme() {
 
         <!-- Drawer demonstration -->
         <SecLabDrawer
+          data-ui="qa-drawer"
           v-model="drawerVisible"
           title="集群高级策略配置"
           width="450px"
@@ -880,6 +906,7 @@ function toggleTheme() {
               "
             >
               <SecLabPagination
+                data-ui="qa-pagination"
                 :current-page="currentPageVal"
                 :total-pages="totalPagesVal"
                 @page-change="
@@ -920,6 +947,7 @@ function toggleTheme() {
               hint="点击输入框选择自定义的时间窗口"
             >
               <SecLabDateTimeRangePicker
+                data-ui="qa-date-time-range"
                 v-model="rangeVal"
                 placeholder="请选择时间范围"
                 start-label="起始时间"
@@ -962,7 +990,12 @@ function toggleTheme() {
             >
               自研数据表格 (SecLabTable)
             </label>
-            <SecLabTable :data="tableData" :columns="tableColumns" border>
+            <SecLabTable
+              data-ui="qa-table"
+              :data="tableData"
+              :columns="tableColumns"
+              border
+            >
               <template #status="{ row }">
                 <SecLabTag
                   :type="row.status === 'active' ? 'success' : 'warning'"

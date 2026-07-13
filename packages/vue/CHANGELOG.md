@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- 增加完整组件行为矩阵、跨框架回归测试、关键组件视觉基线和共享契约文档。
+
+### Fixed
+
+- `SecLabTooltip` 增加 tooltip 角色及触发器描述关联，辅助技术可以识别提示内容。
+- `SecLabActionMenu` 的触发器和菜单项统一使用 SDL 字体，修复 Portal 场景下中文缺字。
+
 ## [0.1.0-alpha.3] - 2026-07-13
 
 ### Fixed

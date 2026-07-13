@@ -123,6 +123,9 @@ importers:
 
   playground:
     dependencies:
+      "@fontsource-variable/noto-sans-sc":
+        specifier: ^5.2.10
+        version: 5.2.10
       "@seclab-dev/icons":
         specifier: workspace:*
         version: link:../packages/icons
@@ -151,6 +154,9 @@ importers:
 
   playground-react:
     dependencies:
+      "@fontsource-variable/noto-sans-sc":
+        specifier: ^5.2.10
+        version: 5.2.10
       "@seclab-dev/icons":
         specifier: workspace:*
         version: link:../packages/icons
@@ -356,6 +362,12 @@ packages:
     peerDependenciesMeta:
       "@noble/hashes":
         optional: true
+
+  "@fontsource-variable/noto-sans-sc@5.2.10":
+    resolution:
+      {
+        integrity: sha512-zdk10i5HrDQTXI7ldD61zToX1fsgig8vDTsu7zB48SXOitWfuX0e5viZAwnkHuhwh096PU6X6i1AyAsbBCISpA==,
+      }
 
   "@img/colour@1.1.0":
     resolution:
@@ -2896,6 +2908,8 @@ snapshots:
     optional: true
 
   "@exodus/bytes@1.15.1": {}
+
+  "@fontsource-variable/noto-sans-sc@5.2.10": {}
 
   "@img/colour@1.1.0": {}
 

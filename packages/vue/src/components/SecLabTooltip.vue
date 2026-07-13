@@ -27,6 +27,7 @@ const isVisible = ref(false);
 const tooltipStyle = ref({});
 const triggerRef = ref<HTMLElement | null>(null);
 const tooltipRef = ref<HTMLElement | null>(null);
+const tooltipId = `sl-tooltip-${Math.random().toString(36).slice(2)}`;
 const actualPosition = ref<TooltipPosition>(props.position);
 
 let timer: number | undefined = undefined;
@@ -151,6 +152,7 @@ onUnmounted(() => {
   <div
     class="sl-tooltip-wrapper"
     ref="triggerRef"
+    :aria-describedby="isVisible && text ? tooltipId : undefined"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   >
@@ -160,7 +162,9 @@ onUnmounted(() => {
         <div
           v-if="isVisible && text"
           ref="tooltipRef"
+          :id="tooltipId"
           class="sl-tooltip-content"
+          role="tooltip"
           :style="tooltipStyle"
           :data-position="actualPosition"
         >

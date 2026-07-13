@@ -12,6 +12,7 @@
     "@seclab-dev/tokens": "workspace:*",
     "@seclab-dev/icons": "workspace:*",
     "@seclab-dev/vue": "workspace:*",
+    "@fontsource-variable/noto-sans-sc": "^5.2.10",
     "vue": "^3.5.38"
   },
   "devDependencies": {

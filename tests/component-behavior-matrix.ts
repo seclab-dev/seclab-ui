@@ -1,0 +1,31 @@
+/** Vue 与 React 公共组件必须共同满足的最低行为契约。 */
+export const componentBehaviorMatrix = {
+  SecLabIcon: ["render", "accessible-name"],
+  SecLabButton: ["state", "click"],
+  SecLabInput: ["value", "change", "invalid"],
+  SecLabSwitch: ["state", "keyboard"],
+  SecLabTag: ["render", "variant"],
+  SecLabCard: ["render", "slots"],
+  SecLabCheckbox: ["state", "change", "indeterminate"],
+  SecLabEmpty: ["render", "custom-content"],
+  SecLabAlert: ["state", "close", "live-region"],
+  SecLabLoading: ["state", "busy"],
+  SecLabBreadcrumb: ["render", "navigation"],
+  SecLabBreadcrumbItem: ["render", "current-item"],
+  SecLabToast: ["state", "close", "live-region"],
+  SecLabTooltip: ["state", "position"],
+  SecLabDescriptions: ["render", "layout"],
+  SecLabFormItem: ["label", "hint", "error"],
+  SecLabTabs: ["state", "keyboard", "tab-semantics"],
+  SecLabMenu: ["state", "keyboard", "navigation-semantics"],
+  SecLabActionMenu: ["state", "keyboard", "menu-semantics"],
+  SecLabDialog: ["state", "escape", "focus", "scroll-lock"],
+  SecLabDrawer: ["state", "escape", "focus", "scroll-lock"],
+  SecLabModal: ["state", "escape", "focus", "scroll-lock"],
+  SecLabPagination: ["state", "change", "navigation-semantics"],
+  SecLabSelect: ["state", "keyboard", "listbox-semantics", "position"],
+  SecLabTable: ["render", "row-key", "fixed-columns"],
+  SecLabDateTimeRangePicker: ["state", "change", "position"],
+} as const;
+
+export type PublicComponentName = keyof typeof componentBehaviorMatrix;

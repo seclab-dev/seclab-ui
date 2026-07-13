@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useId } from "react";
 import { createPortal } from "react-dom";
 import "./SecLabTooltip.css";
 
@@ -26,6 +26,7 @@ export const SecLabTooltip: React.FC<SecLabTooltipProps> = ({
   className = "",
   ...rest
 }) => {
+  const tooltipId = useId();
   const [isRendered, setIsRendered] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
@@ -198,6 +199,7 @@ export const SecLabTooltip: React.FC<SecLabTooltipProps> = ({
     <div
       className={`sl-tooltip-wrapper ${className}`.trim()}
       ref={triggerRef}
+      aria-describedby={isVisible && text ? tooltipId : undefined}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       {...rest}
@@ -210,7 +212,9 @@ export const SecLabTooltip: React.FC<SecLabTooltipProps> = ({
         createPortal(
           <div
             ref={setTooltipRef}
+            id={tooltipId}
             className={`sl-tooltip-content ${isVisible ? "is-visible" : ""}`.trim()}
+            role="tooltip"
             style={tooltipStyle}
             data-position={actualPosition}
           >

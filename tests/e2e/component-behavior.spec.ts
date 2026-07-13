@@ -1,0 +1,97 @@
+import { expect, test, type Page } from "@playwright/test";
+
+const apps = [
+  { name: "vue", url: "http://127.0.0.1:4173" },
+  { name: "react", url: "http://127.0.0.1:4174" },
+] as const;
+async function openApp(page: Page, url: string) {
+  await page.goto(url);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+}
+
+for (const app of apps)
+  test.describe(app.name, () => {
+    test("浮层跟随视口并支持键盘", async ({ page }) => {
+      await openApp(page, app.url);
+      const action = page.locator('[data-ui="qa-action-menu"]');
+      await action.scrollIntoViewIfNeeded();
+      await action.getByRole("button").press("Enter");
+      await expect(page.getByRole("menu")).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(action.getByRole("button")).toBeFocused();
+      const tooltip = page.locator('[data-ui="qa-tooltip"]');
+      await tooltip.scrollIntoViewIfNeeded();
+      await tooltip.getByRole("button").hover();
+      const popup = page.getByRole("tooltip");
+      await expect(popup).toBeVisible();
+      const box = await popup.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.y).toBeGreaterThanOrEqual(0);
+      await page.evaluate(() => window.scrollBy(0, 32));
+      await expect(popup).toBeVisible();
+    });
+
+    test("模态焦点、Escape 与焦点恢复", async ({ page }) => {
+      await openApp(page, app.url);
+      const trigger = page.getByRole("button", { name: "打开对话框 (Dialog)" });
+      await trigger.scrollIntoViewIfNeeded();
+      await trigger.click();
+      await expect(
+        page.getByRole("dialog", { name: "安全审计详情" }),
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(trigger).toBeFocused();
+      const drawerTrigger = page.getByRole("button", {
+        name: "打开右侧抽屉 (Drawer)",
+      });
+      await drawerTrigger.click();
+      await expect(
+        page.getByRole("dialog", { name: "集群高级策略配置" }),
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(drawerTrigger).toBeFocused();
+    });
+
+    test("导航组件支持纯键盘操作", async ({ page }) => {
+      await openApp(page, app.url);
+      const tabs = page.locator('[data-ui="qa-tabs"]');
+      await tabs.scrollIntoViewIfNeeded();
+      await tabs.getByRole("tab").first().focus();
+      await page.keyboard.press("ArrowRight");
+      await expect(tabs.getByRole("tab").nth(1)).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      const menuButtons = page
+        .locator('[data-ui="qa-menu"]')
+        .getByRole("button");
+      await menuButtons.first().focus();
+      await page.keyboard.press("ArrowDown");
+      await expect(menuButtons.nth(1)).toBeFocused();
+      const pagination = page.locator('[data-ui="qa-pagination"]');
+      await pagination.scrollIntoViewIfNeeded();
+      await pagination
+        .getByRole("button", { name: /Next page|下一页/ })
+        .click();
+      await expect(pagination.locator('[aria-current="page"]')).toContainText(
+        "2",
+      );
+    });
+
+    test("320px 视口不产生页面级横向溢出", async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 568 });
+      await openApp(page, app.url);
+      for (const theme of ["light", "dark"]) {
+        await page.evaluate(
+          (value) => document.documentElement.setAttribute("data-theme", value),
+          theme,
+        );
+        const width = await page.evaluate(() => ({
+          viewport: document.documentElement.clientWidth,
+          page: document.documentElement.scrollWidth,
+        }));
+        expect(width.page).toBeLessThanOrEqual(width.viewport);
+      }
+    });
+  });

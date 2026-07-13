@@ -547,7 +547,11 @@ function App() {
               文字提示 (Tooltip)
             </label>
             <div className="row">
-              <SecLabTooltip text="这里是上方的提示内容" position="top">
+              <SecLabTooltip
+                data-ui="qa-tooltip"
+                text="这里是上方的提示内容"
+                position="top"
+              >
                 <SecLabButton size="small">上方提示</SecLabButton>
               </SecLabTooltip>
               <SecLabTooltip text="这里是下方的提示内容" position="bottom">
@@ -663,13 +667,18 @@ function App() {
           >
             <div style={{ flex: 1, maxWidth: "500px" }}>
               <SecLabTabs
+                data-ui="qa-tabs"
                 value={activeTab}
                 onChange={setActiveTab}
                 tabs={tabsList}
               />
             </div>
             <div>
-              <SecLabActionMenu actions={actionsList} label="管理操作" />
+              <SecLabActionMenu
+                data-ui="qa-action-menu"
+                actions={actionsList}
+                label="管理操作"
+              />
             </div>
           </div>
 
@@ -706,6 +715,7 @@ function App() {
               }}
             >
               <SecLabMenu
+                data-ui="qa-menu"
                 value={activeMenu}
                 onChange={setActiveMenu}
                 items={menuItems}
@@ -747,9 +757,11 @@ function App() {
                 header="表单项配置 (FormItem)"
               >
                 <SecLabFormItem
+                  data-ui="qa-form-error"
                   label="目标节点地址"
                   required
                   hint="请填写合法的 IPv4/IPv6 节点通信地址"
+                  error="示例错误：请输入合法的节点地址"
                 >
                   <SecLabInput
                     value={textVal}
@@ -772,10 +784,15 @@ function App() {
         <section className="card">
           <h3>Overlays & Popups 弹窗、抽屉与模态框</h3>
           <div className="row">
-            <SecLabButton type="primary" onClick={() => setDialogVisible(true)}>
+            <SecLabButton
+              data-ui="qa-open-dialog"
+              type="primary"
+              onClick={() => setDialogVisible(true)}
+            >
               打开对话框 (Dialog)
             </SecLabButton>
             <SecLabButton
+              data-ui="qa-open-drawer"
               type="secondary"
               onClick={() => setDrawerVisible(true)}
             >
@@ -788,6 +805,7 @@ function App() {
 
           {/* Dialog demonstration */}
           <SecLabDialog
+            data-ui="qa-dialog"
             visible={dialogVisible}
             title="安全审计详情"
             width="550px"
@@ -838,6 +856,7 @@ function App() {
 
           {/* Drawer demonstration */}
           <SecLabDrawer
+            data-ui="qa-drawer"
             visible={drawerVisible}
             title="集群高级策略配置"
             width="450px"
@@ -994,6 +1013,7 @@ function App() {
                 }}
               >
                 <SecLabPagination
+                  data-ui="qa-pagination"
                   currentPage={currentPageVal}
                   totalPages={totalPagesVal}
                   onPageChange={(page) => {
@@ -1034,6 +1054,7 @@ function App() {
                 hint="点击输入框选择自定义的时间窗口"
               >
                 <SecLabDateTimeRangePicker
+                  data-ui="qa-date-time-range"
                   value={rangeVal}
                   onChange={setRangeVal}
                   placeholder="请选择时间范围"
@@ -1078,6 +1099,7 @@ function App() {
                 自研数据表格 (SecLabTable)
               </label>
               <SecLabTable
+                data-ui="qa-table"
                 data={tableData}
                 columns={tableColumns}
                 border

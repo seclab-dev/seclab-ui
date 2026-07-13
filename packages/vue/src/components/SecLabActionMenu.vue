@@ -198,6 +198,7 @@ onBeforeUnmount(() => {
   font-weight: 500;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: var(--sdl-font-body-sm);
+  font-family: var(--sdl-font-family);
   display: flex;
   align-items: center;
   gap: var(--sdl-space-2);
@@ -247,6 +248,7 @@ onBeforeUnmount(() => {
   text-align: left;
   cursor: pointer;
   font-size: var(--sdl-font-body-sm);
+  font-family: var(--sdl-font-family);
   color: var(--sdl-text-secondary);
   transition: all 0.2s;
   border-radius: var(--sdl-radius-sm);
