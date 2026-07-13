@@ -52,7 +52,7 @@ const keyword = defineModel<string>({ default: "" });
 - 反馈：告警、通知、加载、空状态、提示
 - 导航：菜单、标签页、面包屑
 
-组件的实际 Props、事件和类型声明以发布包中的 TypeScript 类型为准。
+完整用途、交互、无障碍语义及跨框架映射参见[共享组件契约](https://github.com/seclab-dev/seclab-ui/tree/dev/docs/components)。实际 Props、事件和类型声明以发布包中的 TypeScript 类型为准。
 
 ## 约束
 
