@@ -47,6 +47,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Run release quality checks
+        run: pnpm check
+
       - name: Verify selected package version
         env:
           RELEASE_PACKAGE: ${{ inputs.package }}
@@ -69,25 +72,6 @@ jobs:
             echo "$RELEASE_PACKAGE version is $ACTUAL_VERSION, expected $RELEASE_VERSION"
             exit 1
           fi
-
-      - name: Build framework package dependencies
-        if: inputs.package == '@seclab-dev/vue' || inputs.package == '@seclab-dev/react'
-        run: |
-          pnpm --filter @seclab-dev/tokens build
-          pnpm --filter @seclab-dev/icons build
-
-      - name: Type-check selected package
-        env:
-          RELEASE_PACKAGE: ${{ inputs.package }}
-        run: pnpm --filter "$RELEASE_PACKAGE" type-check
-
-      - name: Build selected package
-        env:
-          RELEASE_PACKAGE: ${{ inputs.package }}
-        run: pnpm --filter "$RELEASE_PACKAGE" build
-
-      - name: Check selected package archive
-        run: node scripts/check-packages.mjs "${{ inputs.package }}"
 
       - name: Resolve npm dist-tag
         id: release

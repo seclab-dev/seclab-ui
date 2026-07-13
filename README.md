@@ -28,7 +28,19 @@ pnpm dev
 pnpm dev:react
 pnpm check
 pnpm build
+pnpm test:e2e
 ```
+
+## 文档与测试
+
+- [组件契约](./docs/components/README.md)
+- [贡献指南](./CONTRIBUTING.md)
+- `pnpm format:check`：检查代码格式，不改写文件。
+- `pnpm check`：格式、类型、构建、单元测试、消费者构建和包归档检查。
+- `pnpm test:e2e`：运行 Chromium 行为与视觉回归测试。
+- `pnpm test:e2e:update`：人工确认视觉变更后更新截图基线。
+
+Pull Request 和 `main` 分支推送必须通过完整质量检查；软件包发布前还会重复执行非浏览器检查。
 
 单包构建：
 

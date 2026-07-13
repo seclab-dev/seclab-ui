@@ -9,13 +9,15 @@
     "dev": "pnpm -C playground dev",
     "dev:react": "pnpm -C playground-react dev",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "playground:favicon": "node scripts/build-playground-favicon.mjs",
     "type-check": "pnpm --filter './packages/*' --workspace-concurrency=1 type-check",
     "pack:check": "node scripts/check-packages.mjs",
     "test:consumer": "pnpm -C playground build && pnpm -C playground-react build",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
-    "check": "pnpm type-check && pnpm build && pnpm test:unit && pnpm test:consumer && pnpm pack:check"
+    "test:e2e:update": "playwright test --update-snapshots",
+    "check": "pnpm format:check && pnpm type-check && pnpm build && pnpm test:unit && pnpm test:consumer && pnpm pack:check"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
