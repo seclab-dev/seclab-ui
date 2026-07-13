@@ -10,8 +10,8 @@
     "baseUrl": ".",
     "ignoreDeprecations": "6.0",
     "paths": {
-      "@seclab-dev/icons": ["packages/icons/index.ts"],
-      "@seclab-dev/suite-sdk": ["packages/suite-sdk/index.ts"],
+      "@seclab-dev/icons": ["packages/icons/src/index.ts"],
+      "@seclab-dev/suite-sdk": ["packages/suite-sdk/src/index.ts"],
       "@seclab-dev/vue": ["packages/vue/src/index.ts"],
       "@seclab-dev/react": ["packages/react/src/index.ts"]
     },
