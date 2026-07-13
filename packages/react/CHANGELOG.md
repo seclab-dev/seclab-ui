@@ -2,6 +2,23 @@
 
 格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，并遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [Unreleased]
+
+### Fixed
+
+- `SecLabSelect` 根据视口可用空间自动向上或向下展开，并限制下拉列表尺寸以避免超出视口。
+- 修复 Portal 下拉内容被误判为外部点击的问题。
+- ActionMenu、Tooltip 与日期时间范围选择器支持视口碰撞检测、滚动跟随和窄屏布局。
+- Dialog、Drawer 与 Modal 支持 Esc 关闭、焦点陷阱、焦点恢复和嵌套滚动锁。
+- Select、ActionMenu、Switch、Tabs、Menu 与 Pagination 补齐键盘操作和无障碍语义。
+- Table 支持稳定行键并正确累计多个固定列偏移。
+- FormItem、Input 与 Checkbox 补齐表单关联、数字值类型、密码按钮语义和不确定状态。
+- Toast、Alert 与 Loading 优化窄屏布局、关闭行为和实时状态播报。
+
+### Added
+
+- 建立组件单元测试和 playground 浏览器回归测试，覆盖两端共享的关键交互行为。
+
 ## [0.1.0-alpha.2] - 2026-07-05
 
 ### Added
