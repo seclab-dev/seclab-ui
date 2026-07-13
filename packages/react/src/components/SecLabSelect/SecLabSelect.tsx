@@ -7,6 +7,7 @@ import React, {
   useCallback,
 } from "react";
 import { createPortal } from "react-dom";
+import { computeFloatingPosition } from "../../internal/floating-position";
 import "./SecLabSelect.css";
 
 export interface SecLabSelectOption {
@@ -41,9 +42,6 @@ export interface SecLabSelectProps extends Omit<
 }
 
 const SCROLL_BOTTOM_THRESHOLD = 24;
-const DROPDOWN_GAP = 4;
-const DROPDOWN_MAX_HEIGHT = 260;
-const VIEWPORT_MARGIN = 8;
 
 export const SecLabSelect: React.FC<SecLabSelectProps> = ({
   value,
@@ -75,51 +73,13 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
 
   const calculatePosition = useCallback(() => {
     if (!selectRef.current || !dropdownRef.current || !isOpen) return;
-    const rect = selectRef.current.getBoundingClientRect();
-    const dropdown = dropdownRef.current;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const availableBelow = Math.max(
-      0,
-      viewportHeight - rect.bottom - DROPDOWN_GAP - VIEWPORT_MARGIN,
-    );
-    const availableAbove = Math.max(
-      0,
-      rect.top - DROPDOWN_GAP - VIEWPORT_MARGIN,
-    );
-    const desiredHeight = Math.min(
-      dropdown.scrollHeight,
-      DROPDOWN_MAX_HEIGHT,
-    );
-    const openAbove =
-      availableBelow < desiredHeight && availableAbove > availableBelow;
-    const availableHeight = openAbove ? availableAbove : availableBelow;
-    const maxWidth = Math.max(0, viewportWidth - VIEWPORT_MARGIN * 2);
-    const dropdownWidth = Math.min(
-      Math.max(dropdown.scrollWidth, rect.width),
-      maxWidth,
-    );
-    const left = Math.min(
-      Math.max(rect.left, VIEWPORT_MARGIN),
-      Math.max(
-        VIEWPORT_MARGIN,
-        viewportWidth - VIEWPORT_MARGIN - dropdownWidth,
-      ),
-    );
-
-    setDropdownPlacement(openAbove ? "top" : "bottom");
-    setDropdownStyle({
-      minWidth: `${rect.width}px`,
-      maxWidth: `${maxWidth}px`,
-      maxHeight: `${Math.min(DROPDOWN_MAX_HEIGHT, availableHeight)}px`,
-      left: `${left}px`,
-      top: openAbove ? "auto" : `${rect.bottom + DROPDOWN_GAP}px`,
-      bottom: openAbove
-        ? `${viewportHeight - rect.top + DROPDOWN_GAP}px`
-        : "auto",
-      position: "fixed",
-      visibility: "visible",
+    const position = computeFloatingPosition({
+      anchor: selectRef.current,
+      floating: dropdownRef.current,
+      matchWidth: true,
     });
+    setDropdownPlacement(position.placement);
+    setDropdownStyle(position.style);
   }, [isOpen]);
 
   useLayoutEffect(() => {

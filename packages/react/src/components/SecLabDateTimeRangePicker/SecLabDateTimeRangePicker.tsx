@@ -6,6 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { createPortal } from "react-dom";
+import { computeFloatingPosition } from "../../internal/floating-position";
 import "./SecLabDateTimeRangePicker.css";
 
 export interface DateTimeRangeValue {
@@ -166,6 +167,7 @@ export const SecLabDateTimeRangePicker: React.FC<
     startOfMonth(new Date()),
   );
   const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({});
+  const [panelPlacement, setPanelPlacement] = useState<"top" | "bottom">("bottom");
 
   const hours = useMemo(
     () => Array.from({ length: 24 }, (_, index) => index),
@@ -237,22 +239,17 @@ export const SecLabDateTimeRangePicker: React.FC<
 
   const updatePanelPosition = useCallback(() => {
     const trigger = triggerRef.current;
-    if (!trigger) return;
-
-    const rect = trigger.getBoundingClientRect();
-    const width = 620;
-    const gap = 8;
-    const left = Math.min(
-      Math.max(8, rect.left),
-      window.innerWidth - width - 8,
-    );
-    const top = Math.min(rect.bottom + gap, window.innerHeight - 468);
-
+    if (!trigger || !panelRef.current) return;
+    const position = computeFloatingPosition({
+      anchor: trigger,
+      floating: panelRef.current,
+      gap: 8,
+      maxHeight: window.innerHeight - 16,
+    });
+    setPanelPlacement(position.placement);
     setPanelStyle({
-      width: `${width}px`,
-      left: `${left}px`,
-      top: `${Math.max(8, top)}px`,
-      position: "fixed",
+      ...position.style,
+      width: `${Math.min(620, window.innerWidth - 16)}px`,
     });
   }, []);
 
@@ -418,7 +415,12 @@ export const SecLabDateTimeRangePicker: React.FC<
 
       {isOpen &&
         createPortal(
-          <div ref={panelRef} className="range-panel" style={panelStyle}>
+          <div
+            ref={panelRef}
+            className="range-panel"
+            style={panelStyle}
+            data-placement={panelPlacement}
+          >
             <aside className="shortcut-column">
               <div className="panel-title">{shortcutsLabel}</div>
               {shortcuts.map((shortcut) => (

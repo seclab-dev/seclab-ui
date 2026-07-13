@@ -29,6 +29,7 @@ export const SecLabTooltip: React.FC<SecLabTooltipProps> = ({
   const [isRendered, setIsRendered] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
+  const [actualPosition, setActualPosition] = useState<TooltipPosition>(position);
 
   const triggerRef = useRef<HTMLDivElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -44,6 +45,7 @@ export const SecLabTooltip: React.FC<SecLabTooltipProps> = ({
       const tooltipRect = node.getBoundingClientRect();
 
       const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
       const margin = 5;
 
       let top = 0;
@@ -53,11 +55,24 @@ export const SecLabTooltip: React.FC<SecLabTooltipProps> = ({
       const triggerCenterX = triggerRect.left + triggerRect.width / 2;
       const offset = 8;
 
-      switch (position) {
+      let placement = position;
+      const fits = (candidate: TooltipPosition) => {
+        if (candidate === "top") return triggerRect.top - tooltipRect.height - offset >= margin;
+        if (candidate === "bottom") return triggerRect.bottom + tooltipRect.height + offset <= viewportHeight - margin;
+        if (candidate === "left") return triggerRect.left - tooltipRect.width - offset >= margin;
+        return triggerRect.right + tooltipRect.width + offset <= viewportWidth - margin;
+      };
+      const opposite: Record<TooltipPosition, TooltipPosition> = {
+        top: "bottom", bottom: "top", left: "right", right: "left",
+      };
+      if (!fits(placement) && fits(opposite[placement])) placement = opposite[placement];
+      setActualPosition(placement);
+
+      switch (placement) {
         case "top":
         case "bottom":
           top =
-            position === "top"
+            placement === "top"
               ? triggerRect.top - tooltipRect.height - offset
               : triggerRect.bottom + offset;
           left = triggerCenterX - tooltipRect.width / 2;
@@ -75,15 +90,18 @@ export const SecLabTooltip: React.FC<SecLabTooltipProps> = ({
         case "right":
           top = triggerCenterY - tooltipRect.height / 2;
           left =
-            position === "left"
+            placement === "left"
               ? triggerRect.left - tooltipRect.width - offset
               : triggerRect.right + offset;
           break;
       }
 
+      top = Math.min(Math.max(top, margin), Math.max(margin, viewportHeight - margin - tooltipRect.height));
+      left = Math.min(Math.max(left, margin), Math.max(margin, viewportWidth - margin - tooltipRect.width));
       setTooltipStyle({
-        top: `${top + window.scrollY}px`,
-        left: `${left + window.scrollX}px`,
+        position: "fixed",
+        top: `${top}px`,
+        left: `${left}px`,
       });
     },
     [position],
@@ -140,11 +158,11 @@ export const SecLabTooltip: React.FC<SecLabTooltipProps> = ({
     };
 
     window.addEventListener("resize", handleUpdate);
-    window.addEventListener("scroll", handleUpdate, { passive: true });
+    window.addEventListener("scroll", handleUpdate, true);
 
     return () => {
       window.removeEventListener("resize", handleUpdate);
-      window.removeEventListener("scroll", handleUpdate);
+      window.removeEventListener("scroll", handleUpdate, true);
     };
   }, [isVisible, calculatePosition]);
 
@@ -174,10 +192,10 @@ export const SecLabTooltip: React.FC<SecLabTooltipProps> = ({
             ref={setTooltipRef}
             className={`sl-tooltip-content ${isVisible ? "is-visible" : ""}`.trim()}
             style={tooltipStyle}
-            data-position={position}
+            data-position={actualPosition}
           >
             {text}
-            <span className="sl-tooltip-arrow" data-position={position}></span>
+            <span className="sl-tooltip-arrow" data-position={actualPosition}></span>
           </div>,
           document.body,
         )}

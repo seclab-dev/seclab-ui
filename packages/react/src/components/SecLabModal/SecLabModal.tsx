@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
+import { activateModalLifecycle } from "../../internal/modal-lifecycle";
 import "./SecLabModal.css";
 
 export interface SecLabModalProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -33,6 +34,12 @@ export const SecLabModal: React.FC<SecLabModalProps> = ({
   className = "",
   ...rest
 }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  useEffect(() => {
+    if (!visible || !cardRef.current) return;
+    return activateModalLifecycle(cardRef.current, () => onCancel?.());
+  }, [visible, onCancel]);
   if (!visible) return null;
 
   const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -48,10 +55,10 @@ export const SecLabModal: React.FC<SecLabModalProps> = ({
       role="presentation"
       {...rest}
     >
-      <div className="sl-modal-card" role="alertdialog" aria-modal="true">
+      <div ref={cardRef} className="sl-modal-card" role="alertdialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         {/* 头部标题栏 */}
         <div className="sl-modal-header" data-slot="header">
-          <h3 className="sl-modal-title">{title}</h3>
+          <h3 id={titleId} className="sl-modal-title">{title}</h3>
         </div>
 
         {/* 消息内容 */}

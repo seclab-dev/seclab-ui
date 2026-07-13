@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
+import { activateModalLifecycle } from "../internal/modal-lifecycle";
 
 defineOptions({
   inheritAttrs: false,
@@ -30,6 +31,9 @@ const emit = defineEmits<{
 }>();
 
 const drawerStyle = computed(() => ({ width: props.width }));
+const panelRef = ref<HTMLElement | null>(null);
+const titleId = `sl-drawer-title-${Math.random().toString(36).slice(2)}`;
+let deactivate: (() => void) | undefined;
 
 const closeDrawer = () => {
   emit("update:modelValue", false);
@@ -40,6 +44,19 @@ const handleOverlayClick = () => {
   if (!props.closeOnOverlay) return;
   closeDrawer();
 };
+watch(
+  () => props.modelValue,
+  async (visible) => {
+    deactivate?.();
+    deactivate = undefined;
+    if (visible) {
+      await nextTick();
+      if (panelRef.value) deactivate = activateModalLifecycle(panelRef.value, closeDrawer);
+    }
+  },
+  { immediate: true },
+);
+onBeforeUnmount(() => deactivate?.());
 </script>
 
 <template>
@@ -52,15 +69,17 @@ const handleOverlayClick = () => {
         @click.self="handleOverlayClick"
       >
         <div
+          ref="panelRef"
           class="sl-drawer-panel"
           :style="drawerStyle"
           role="dialog"
           aria-modal="true"
-          :aria-label="props.title"
+          :aria-labelledby="titleId"
+          tabindex="-1"
         >
           <div class="sl-drawer-header" data-slot="header">
-            <h3 class="sl-drawer-title">{{ props.title }}</h3>
-            <button class="sl-drawer-close-btn" @click="closeDrawer">×</button>
+            <h3 :id="titleId" class="sl-drawer-title">{{ props.title }}</h3>
+            <button type="button" class="sl-drawer-close-btn" aria-label="Close drawer" @click="closeDrawer">×</button>
           </div>
           <div class="sl-drawer-body">
             <slot />

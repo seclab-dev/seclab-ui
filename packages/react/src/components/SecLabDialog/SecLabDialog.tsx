@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
+import { activateModalLifecycle } from "../../internal/modal-lifecycle";
 import "./SecLabDialog.css";
 
 export interface SecLabDialogProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -34,6 +35,12 @@ export const SecLabDialog: React.FC<SecLabDialogProps> = ({
   children,
   ...rest
 }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  useEffect(() => {
+    if (!visible || !cardRef.current) return;
+    return activateModalLifecycle(cardRef.current, () => onClose?.());
+  }, [visible, onClose]);
   if (!visible) return null;
 
   const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -56,14 +63,17 @@ export const SecLabDialog: React.FC<SecLabDialogProps> = ({
       {...rest}
     >
       <div
+        ref={cardRef}
         className="sl-dialog-card"
         style={{ width, maxWidth: "95%" }}
         role="dialog"
         aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
       >
         {/* 头部标题栏 */}
         <div className="sl-dialog-header" data-slot="header">
-          <span className="sl-dialog-title">{title}</span>
+          <span id={titleId} className="sl-dialog-title">{title}</span>
           <button
             type="button"
             className="sl-dialog-close-btn"

@@ -4,7 +4,7 @@
 
 .sl-tooltip-content {
   z-index: var(--sdl-z-index-modal); /* 使用规范的 Z-Index */
-  position: absolute;
+  position: fixed;
   background-color: var(--sdl-bg-panel);
   color: var(--sdl-text-primary);
   padding: var(--sdl-space-1) var(--sdl-space-3);

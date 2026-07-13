@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { nextTick, onBeforeUnmount, ref, watch } from "vue";
+import { activateModalLifecycle } from "../internal/modal-lifecycle";
 defineOptions({
   inheritAttrs: false,
 });
@@ -22,7 +24,7 @@ interface Props {
   type?: "primary" | "danger" | "warning";
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   confirmText: "确定",
   cancelText: "取消",
   type: "primary",
@@ -32,6 +34,22 @@ const emit = defineEmits<{
   (e: "confirm"): void;
   (e: "cancel"): void;
 }>();
+const cardRef = ref<HTMLElement | null>(null);
+const titleId = `sl-modal-title-${Math.random().toString(36).slice(2)}`;
+let deactivate: (() => void) | undefined;
+watch(
+  () => props.visible,
+  async (visible) => {
+    deactivate?.();
+    deactivate = undefined;
+    if (visible) {
+      await nextTick();
+      if (cardRef.value) deactivate = activateModalLifecycle(cardRef.value, () => emit("cancel"));
+    }
+  },
+  { immediate: true },
+);
+onBeforeUnmount(() => deactivate?.());
 </script>
 
 <template>
@@ -43,19 +61,20 @@ const emit = defineEmits<{
         v-bind="$attrs"
         @click.self="emit('cancel')"
       >
-        <div class="sl-modal-card" role="alertdialog" aria-modal="true">
+        <div ref="cardRef" class="sl-modal-card" role="alertdialog" aria-modal="true" :aria-labelledby="titleId" tabindex="-1">
           <div class="sl-modal-header" data-slot="header">
-            <h3 class="sl-modal-title">{{ title }}</h3>
+            <h3 :id="titleId" class="sl-modal-title">{{ title }}</h3>
           </div>
           <div class="sl-modal-body">
             <p class="sl-modal-message">{{ message }}</p>
           </div>
           <div class="sl-modal-footer" data-slot="footer">
-            <button class="sl-modal-btn is-cancel" @click="emit('cancel')">
+            <button type="button" class="sl-modal-btn is-cancel" @click="emit('cancel')">
               {{ cancelText }}
             </button>
             <button
               class="sl-modal-btn"
+              type="button"
               :class="[`is-${type}`]"
               @click="emit('confirm')"
             >

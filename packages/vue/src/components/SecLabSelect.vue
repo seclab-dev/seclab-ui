@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, computed, nextTick } from "vue";
+import { computeFloatingPosition } from "../internal/floating-position";
 
 /**
  * @file SecLabSelect.vue
@@ -32,9 +33,6 @@ const emit = defineEmits<{
 }>();
 
 const SCROLL_BOTTOM_THRESHOLD = 24;
-const DROPDOWN_GAP = 4;
-const DROPDOWN_MAX_HEIGHT = 260;
-const VIEWPORT_MARGIN = 8;
 const isOpen = ref(false);
 const selectRef = ref<HTMLElement | null>(null);
 const dropdownRef = ref<HTMLElement | null>(null);
@@ -52,45 +50,13 @@ const selectedLabel = computed(() => {
 
 const calculatePosition = () => {
   if (!selectRef.value || !dropdownRef.value || !isOpen.value) return;
-  const rect = selectRef.value.getBoundingClientRect();
-  const dropdown = dropdownRef.value;
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  const availableBelow = Math.max(
-    0,
-    viewportHeight - rect.bottom - DROPDOWN_GAP - VIEWPORT_MARGIN,
-  );
-  const availableAbove = Math.max(
-    0,
-    rect.top - DROPDOWN_GAP - VIEWPORT_MARGIN,
-  );
-  const desiredHeight = Math.min(dropdown.scrollHeight, DROPDOWN_MAX_HEIGHT);
-  const openAbove =
-    availableBelow < desiredHeight && availableAbove > availableBelow;
-  const availableHeight = openAbove ? availableAbove : availableBelow;
-  const maxHeight = Math.min(DROPDOWN_MAX_HEIGHT, availableHeight);
-  const maxWidth = Math.max(0, viewportWidth - VIEWPORT_MARGIN * 2);
-  const dropdownWidth = Math.min(
-    Math.max(dropdown.scrollWidth, rect.width),
-    maxWidth,
-  );
-  const left = Math.min(
-    Math.max(rect.left, VIEWPORT_MARGIN),
-    Math.max(VIEWPORT_MARGIN, viewportWidth - VIEWPORT_MARGIN - dropdownWidth),
-  );
-
-  dropdownPlacement.value = openAbove ? "top" : "bottom";
-  dropdownStyle.value = {
-    minWidth: `${rect.width}px`,
-    maxWidth: `${maxWidth}px`,
-    maxHeight: `${maxHeight}px`,
-    left: `${left}px`,
-    top: openAbove ? "auto" : `${rect.bottom + DROPDOWN_GAP}px`,
-    bottom: openAbove
-      ? `${viewportHeight - rect.top + DROPDOWN_GAP}px`
-      : "auto",
-    visibility: "visible",
-  };
+  const position = computeFloatingPosition({
+    anchor: selectRef.value,
+    floating: dropdownRef.value,
+    matchWidth: true,
+  });
+  dropdownPlacement.value = position.placement;
+  dropdownStyle.value = position.style;
 };
 
 watch(isOpen, (val) => {

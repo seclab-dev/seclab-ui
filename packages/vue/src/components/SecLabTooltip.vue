@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onUnmounted, nextTick } from "vue";
+import { ref, onMounted, onUnmounted, nextTick } from "vue";
 
 /**
  * @file SecLabTooltip.vue
@@ -27,6 +27,7 @@ const isVisible = ref(false);
 const tooltipStyle = ref({});
 const triggerRef = ref<HTMLElement | null>(null);
 const tooltipRef = ref<HTMLElement | null>(null);
+const actualPosition = ref<TooltipPosition>(props.position);
 
 let timer: number | undefined = undefined;
 
@@ -39,6 +40,7 @@ const calculatePosition = () => {
   const tooltipRect = tooltipRef.value.getBoundingClientRect();
 
   const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
   const margin = 5;
 
   let top = 0;
@@ -48,11 +50,27 @@ const calculatePosition = () => {
   const triggerCenterX = triggerRect.left + triggerRect.width / 2;
   const offset = 8;
 
-  switch (props.position) {
+  let placement = props.position;
+  const fits = (candidate: TooltipPosition) => {
+    if (candidate === "top") return triggerRect.top - tooltipRect.height - offset >= margin;
+    if (candidate === "bottom") return triggerRect.bottom + tooltipRect.height + offset <= viewportHeight - margin;
+    if (candidate === "left") return triggerRect.left - tooltipRect.width - offset >= margin;
+    return triggerRect.right + tooltipRect.width + offset <= viewportWidth - margin;
+  };
+  const opposite: Record<TooltipPosition, TooltipPosition> = {
+    top: "bottom",
+    bottom: "top",
+    left: "right",
+    right: "left",
+  };
+  if (!fits(placement) && fits(opposite[placement])) placement = opposite[placement];
+  actualPosition.value = placement;
+
+  switch (placement) {
     case "top":
     case "bottom":
       top =
-        props.position === "top"
+        placement === "top"
           ? triggerRect.top - tooltipRect.height - offset
           : triggerRect.bottom + offset;
       left = triggerCenterX - tooltipRect.width / 2;
@@ -70,15 +88,18 @@ const calculatePosition = () => {
     case "right":
       top = triggerCenterY - tooltipRect.height / 2;
       left =
-        props.position === "left"
+        placement === "left"
           ? triggerRect.left - tooltipRect.width - offset
           : triggerRect.right + offset;
       break;
   }
 
+  top = Math.min(Math.max(top, margin), Math.max(margin, viewportHeight - margin - tooltipRect.height));
+  left = Math.min(Math.max(left, margin), Math.max(margin, viewportWidth - margin - tooltipRect.width));
   tooltipStyle.value = {
-    top: `${top + window.scrollY}px`,
-    left: `${left + window.scrollX}px`,
+    position: "fixed",
+    top: `${top}px`,
+    left: `${left}px`,
   };
 };
 
@@ -99,8 +120,15 @@ const handleMouseLeave = () => {
   isVisible.value = false;
 };
 
+onMounted(() => {
+  window.addEventListener("resize", calculatePosition);
+  window.addEventListener("scroll", calculatePosition, true);
+});
+
 onUnmounted(() => {
   clearTimeout(timer);
+  window.removeEventListener("resize", calculatePosition);
+  window.removeEventListener("scroll", calculatePosition, true);
 });
 </script>
 
@@ -119,10 +147,10 @@ onUnmounted(() => {
           ref="tooltipRef"
           class="sl-tooltip-content"
           :style="tooltipStyle"
-          :data-position="position"
+          :data-position="actualPosition"
         >
           {{ text }}
-          <span class="sl-tooltip-arrow" :data-position="position"></span>
+          <span class="sl-tooltip-arrow" :data-position="actualPosition"></span>
         </div>
       </Transition>
     </teleport>
@@ -136,7 +164,7 @@ onUnmounted(() => {
 
 .sl-tooltip-content {
   z-index: var(--sdl-z-index-modal); /* 使用规范的 Z-Index */
-  position: absolute;
+  position: fixed;
   background-color: var(--sdl-bg-panel);
   color: var(--sdl-text-primary);
   padding: var(--sdl-space-1) var(--sdl-space-3);

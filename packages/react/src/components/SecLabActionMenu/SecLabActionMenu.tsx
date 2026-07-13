@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { SecLabIcon } from "../SecLabIcon/SecLabIcon";
 import { SecLabTooltip } from "../SecLabTooltip/SecLabTooltip";
 import "./SecLabActionMenu.css";
+import { computeFloatingPosition } from "../../internal/floating-position";
 
 export interface SecLabAction {
   label: string;
@@ -35,18 +36,18 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+  const [dropdownPlacement, setDropdownPlacement] = useState<"top" | "bottom">("bottom");
   const menuRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const updateDropdownPosition = useCallback(() => {
-    if (!menuRef.current || !showMenu) return;
-    const rect = menuRef.current.getBoundingClientRect();
-    setDropdownStyle({
-      top: `${rect.bottom + window.scrollY + 4}px`,
-      left: `${rect.right + window.scrollX}px`,
-      transform: "translateX(-100%)",
-      position: "absolute",
+    if (!menuRef.current || !dropdownRef.current || !showMenu) return;
+    const position = computeFloatingPosition({
+      anchor: menuRef.current,
+      floating: dropdownRef.current,
     });
+    setDropdownPlacement(position.placement);
+    setDropdownStyle(position.style);
   }, [showMenu]);
 
   useEffect(() => {
@@ -116,6 +117,7 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
             ref={dropdownRef}
             className="sl-dropdown"
             style={dropdownStyle}
+            data-placement={dropdownPlacement}
             onClick={(e) => e.stopPropagation()}
           >
             {actions.map((action, index) => {

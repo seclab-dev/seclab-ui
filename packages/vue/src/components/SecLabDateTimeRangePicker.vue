@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
+import { computeFloatingPosition } from "../internal/floating-position";
 
 /**
  * @file SecLabDateTimeRangePicker.vue
@@ -63,6 +64,7 @@ const activeBoundary = ref<"start" | "end">("start");
 const draft = ref<DateTimeRangeValue>({ startAt: null, endAt: null });
 const visibleMonth = ref(startOfMonth(new Date()));
 const panelStyle = ref<Record<string, string>>({});
+const panelPlacement = ref<"top" | "bottom">("bottom");
 
 const hours = Array.from({ length: 24 }, (_, index) => index);
 const minutes = Array.from({ length: 12 }, (_, index) => index * 5);
@@ -195,18 +197,17 @@ function formatDateTime(value: number | null) {
 
 function updatePanelPosition() {
   const trigger = triggerRef.value;
-  if (!trigger) return;
-
-  const rect = trigger.getBoundingClientRect();
-  const width = 620;
-  const gap = 8;
-  const left = Math.min(Math.max(8, rect.left), window.innerWidth - width - 8);
-  const top = Math.min(rect.bottom + gap, window.innerHeight - 468);
-
+  if (!trigger || !panelRef.value) return;
+  const position = computeFloatingPosition({
+    anchor: trigger,
+    floating: panelRef.value,
+    gap: 8,
+    maxHeight: window.innerHeight - 16,
+  });
+  panelPlacement.value = position.placement;
   panelStyle.value = {
-    width: `${width}px`,
-    left: `${left}px`,
-    top: `${Math.max(8, top)}px`,
+    ...position.style,
+    width: `${Math.min(620, window.innerWidth - 16)}px`,
   };
 }
 
@@ -351,7 +352,13 @@ onBeforeUnmount(closePanel);
     </button>
 
     <Teleport to="body">
-      <div v-if="isOpen" ref="panelRef" class="range-panel" :style="panelStyle">
+      <div
+        v-if="isOpen"
+        ref="panelRef"
+        class="range-panel"
+        :style="panelStyle"
+        :data-placement="panelPlacement"
+      >
         <aside class="shortcut-column">
           <div class="panel-title">{{ shortcutsLabel }}</div>
           <button
@@ -518,7 +525,7 @@ onBeforeUnmount(closePanel);
 
 .range-panel {
   position: fixed;
-  z-index: 5000;
+  z-index: calc(var(--sdl-z-index-modal) + 1);
   display: grid;
   grid-template-columns: 120px 1fr 116px;
   grid-template-rows: auto 48px;
@@ -530,6 +537,14 @@ onBeforeUnmount(closePanel);
   color: var(--sdl-text-primary);
   box-shadow: var(--sdl-shadow-panel);
   box-sizing: border-box;
+  overflow: auto;
+}
+
+@media (max-width: 640px) {
+  .range-panel {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
 }
 
 .shortcut-column,

@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
+import { activateModalLifecycle } from "../../internal/modal-lifecycle";
 import "./SecLabDrawer.css";
 
 export interface SecLabDrawerProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -31,6 +32,12 @@ export const SecLabDrawer: React.FC<SecLabDrawerProps> = ({
   children,
   ...rest
 }) => {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  useEffect(() => {
+    if (!visible || !panelRef.current) return;
+    return activateModalLifecycle(panelRef.current, () => onClose?.());
+  }, [visible, onClose]);
   if (!visible) return null;
 
   const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -52,15 +59,17 @@ export const SecLabDrawer: React.FC<SecLabDrawerProps> = ({
       {...rest}
     >
       <div
+        ref={panelRef}
         className="sl-drawer-panel"
         style={drawerStyle}
         role="dialog"
         aria-modal="true"
-        aria-label={title || undefined}
+        aria-labelledby={titleId}
+        tabIndex={-1}
       >
         {/* 头部标题栏 */}
         <div className="sl-drawer-header" data-slot="header">
-          <h3 className="sl-drawer-title">{title}</h3>
+          <h3 id={titleId} className="sl-drawer-title">{title}</h3>
           <button
             type="button"
             className="sl-drawer-close-btn"

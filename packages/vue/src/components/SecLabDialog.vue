@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
+import { activateModalLifecycle } from "../internal/modal-lifecycle";
 
 defineOptions({
   inheritAttrs: false,
@@ -35,6 +36,22 @@ const emit = defineEmits<{
 const overlayStyle = computed(() => ({
   zIndex: props.zIndex,
 }));
+const cardRef = ref<HTMLElement | null>(null);
+const titleId = `sl-dialog-title-${Math.random().toString(36).slice(2)}`;
+let deactivate: (() => void) | undefined;
+watch(
+  () => props.visible,
+  async (visible) => {
+    deactivate?.();
+    deactivate = undefined;
+    if (visible) {
+      await nextTick();
+      if (cardRef.value) deactivate = activateModalLifecycle(cardRef.value, () => emit("close"));
+    }
+  },
+  { immediate: true },
+);
+onBeforeUnmount(() => deactivate?.());
 </script>
 
 <template>
@@ -48,14 +65,17 @@ const overlayStyle = computed(() => ({
         @click.self="closeOnClickOverlay ? emit('close') : undefined"
       >
         <div
+          ref="cardRef"
           class="sl-dialog-card"
           :style="{ width, maxWidth: '95%' }"
           role="dialog"
           aria-modal="true"
+          :aria-labelledby="titleId"
+          tabindex="-1"
         >
           <!-- 头部标题栏 -->
           <div class="sl-dialog-header" data-slot="header">
-            <span class="sl-dialog-title">{{ title }}</span>
+            <span :id="titleId" class="sl-dialog-title">{{ title }}</span>
             <button
               class="sl-dialog-close-btn"
               @click="emit('close')"
@@ -89,7 +109,7 @@ const overlayStyle = computed(() => ({
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000; /* 确保在全局通知和抽屉之上的合适层级 */
+  z-index: var(--sdl-z-index-modal);
 }
 
 .sl-dialog-card {

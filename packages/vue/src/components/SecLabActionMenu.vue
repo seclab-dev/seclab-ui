@@ -8,6 +8,7 @@ import { nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 
 import SecLabTooltip from "./SecLabTooltip.vue";
 import SecLabIcon from "./SecLabIcon.vue";
+import { computeFloatingPosition } from "../internal/floating-position";
 
 interface Action {
   label: string;
@@ -39,15 +40,16 @@ const showMenu = ref(false);
 const menuRef = ref<HTMLElement | null>(null);
 const dropdownRef = ref<HTMLElement | null>(null);
 const dropdownStyle = ref<Record<string, string>>({});
+const dropdownPlacement = ref<"top" | "bottom">("bottom");
 
 const updateDropdownPosition = () => {
-  if (!menuRef.value || !showMenu.value) return;
-  const rect = menuRef.value.getBoundingClientRect();
-  dropdownStyle.value = {
-    top: `${rect.bottom + window.scrollY + 4}px`,
-    left: `${rect.right + window.scrollX}px`,
-    transform: "translateX(-100%)",
-  };
+  if (!menuRef.value || !dropdownRef.value || !showMenu.value) return;
+  const position = computeFloatingPosition({
+    anchor: menuRef.value,
+    floating: dropdownRef.value,
+  });
+  dropdownPlacement.value = position.placement;
+  dropdownStyle.value = position.style;
 };
 
 const toggleMenu = () => {
@@ -101,6 +103,7 @@ onBeforeUnmount(() => {
           ref="dropdownRef"
           class="sl-dropdown"
           :style="dropdownStyle"
+          :data-placement="dropdownPlacement"
           @click.stop
         >
           <template v-for="(action, index) in actions" :key="index">
@@ -164,7 +167,7 @@ onBeforeUnmount(() => {
 }
 
 .sl-dropdown {
-  position: absolute;
+  position: fixed;
   background-color: var(--sdl-bg-panel);
   border: 1px solid var(--sdl-border-strong);
   border-radius: var(--sdl-radius-md);
@@ -172,7 +175,8 @@ onBeforeUnmount(() => {
   z-index: var(--sdl-z-index-popover);
   min-width: 140px;
   padding: var(--sdl-space-1);
-  overflow: hidden;
+  max-height: 260px;
+  overflow-y: auto;
 }
 
 .sl-dropdown-tooltip-wrapper {

@@ -46,7 +46,7 @@
 
 .range-panel {
   position: fixed;
-  z-index: 5000;
+  z-index: calc(var(--sdl-z-index-modal) + 1);
   display: grid;
   grid-template-columns: 120px 1fr 116px;
   grid-template-rows: auto 48px;
@@ -58,6 +58,14 @@
   color: var(--sdl-text-primary);
   box-shadow: var(--sdl-shadow-panel);
   box-sizing: border-box;
+  overflow: auto;
+}
+
+@media (max-width: 640px) {
+  .range-panel {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
 }
 
 .shortcut-column,
