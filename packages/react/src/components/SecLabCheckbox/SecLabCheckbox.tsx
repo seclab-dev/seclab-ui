@@ -6,7 +6,7 @@ export interface SecLabCheckboxProps extends Omit<
   "onChange" | "id" | "aria-label" | "aria-labelledby" | "aria-describedby"
 > {
   /** 绑定值 */
-  checked?: boolean;
+  checked: boolean;
   /** 禁用状态 */
   disabled?: boolean;
   /** 改变事件 */
@@ -20,7 +20,7 @@ export interface SecLabCheckboxProps extends Omit<
 }
 
 export const SecLabCheckbox: React.FC<SecLabCheckboxProps> = ({
-  checked = false,
+  checked,
   disabled = false,
   onChange,
   indeterminate = false,

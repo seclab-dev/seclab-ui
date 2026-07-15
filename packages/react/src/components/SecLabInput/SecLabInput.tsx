@@ -16,7 +16,7 @@ export interface SecLabInputProps<
   | "aria-describedby"
 > {
   /** 绑定值 */
-  value?: T;
+  value: T;
   /** 输入类型 */
   type?: "text" | "password" | "textarea" | "number" | "datetime-local";
   /** 占位符 */
@@ -24,10 +24,8 @@ export interface SecLabInputProps<
   /** 是否禁用 */
   disabled?: boolean;
   /** 是否只读 */
-  readonly?: boolean;
   readOnly?: boolean;
   /** 最大长度 */
-  maxlength?: number;
   maxLength?: number;
   /** 行数 (仅 textarea 有效) */
   rows?: number;
@@ -40,7 +38,6 @@ export interface SecLabInputProps<
   /** 步长 (仅 number 有效) */
   step?: number | string;
   /** 自动填充属性 */
-  autocomplete?: string;
   autoComplete?: string;
   /** 值改变事件 */
   onChange?: (value: T) => void;
@@ -61,16 +58,13 @@ export function SecLabInput<T extends string | number | null = string>({
   type = "text",
   placeholder,
   disabled = false,
-  readonly,
   readOnly,
-  maxlength,
   maxLength,
   rows = 3,
   showPassword = false,
   min,
   max,
   step,
-  autocomplete,
   autoComplete,
   onChange,
   onFocus,
@@ -105,10 +99,6 @@ export function SecLabInput<T extends string | number | null = string>({
     setIsPasswordVisible((prev) => !prev);
   };
 
-  const finalReadOnly = readonly ?? readOnly;
-  const finalMaxLength = maxlength ?? maxLength;
-  const finalAutoComplete = autocomplete ?? autoComplete;
-
   const inputType = type === "password" && isPasswordVisible ? "text" : type;
 
   const displayValue =
@@ -130,8 +120,8 @@ export function SecLabInput<T extends string | number | null = string>({
           value={displayValue}
           placeholder={placeholder}
           disabled={disabled}
-          readOnly={finalReadOnly}
-          maxLength={finalMaxLength}
+          readOnly={readOnly}
+          maxLength={maxLength}
           rows={rows}
           onChange={handleInput}
           onFocus={onFocus}
@@ -151,12 +141,12 @@ export function SecLabInput<T extends string | number | null = string>({
             value={displayValue}
             placeholder={placeholder}
             disabled={disabled}
-            readOnly={finalReadOnly}
-            maxLength={finalMaxLength}
+            readOnly={readOnly}
+            maxLength={maxLength}
             min={min}
             max={max}
             step={step}
-            autoComplete={finalAutoComplete}
+            autoComplete={autoComplete}
             onChange={handleInput}
             onFocus={onFocus}
             onBlur={onBlur}

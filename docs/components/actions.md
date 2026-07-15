@@ -10,7 +10,7 @@
 ## ActionMenu
 
 - **适用**：同一对象的多个次要操作；单一主操作应使用 Button。
-- **API**：`actions`、`label`、`disabled`、`defaultIcon`；动作包含 `label`、`icon`、`disabled`、`tooltip`、`handler`。
+- **API**：`actions`、`label`、`disabled`、`defaultIcon`；动作包含 `label`、`className`、`icon`、`disabled`、`tooltip`、`handler`，两端配置对象字段完全一致。
 - **交互与语义**：触发器为 menu button，下拉为 `menu/menuitem`；Enter、Space、ArrowDown 打开，方向键/Home/End 移动，Escape 关闭并恢复焦点。
 - **标准场景**：正常、禁用动作、视口上下边缘、祖先滚动和窄屏长选项。
 - **框架差异**：无业务差异；Vue 属性使用短横线模板命名，React 使用 camelCase。

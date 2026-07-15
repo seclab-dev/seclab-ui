@@ -65,6 +65,8 @@ const keyword = defineModel<string>({ default: "" });
 
 `SecLabInput`、`SecLabCheckbox` 和 `SecLabSelect` 未提供 `id` 时会自动生成；参与原生表单提交时应提供 `name`。复杂控件可通过 `aria-labelledby` 和 `aria-describedby` 显式关联 `SecLabFormItem` 的标签、提示与错误节点。
 
+受控组件的 `modelValue` 为必填；变化通过 `update:modelValue` 和必要的 `change` 事件返回。Vue 模板继续使用 `readonly`、`maxlength`、`autocomplete`、`for` 和 `class` 等惯用名称，业务参数、默认值及配置对象字段与 React 契约保持一致。
+
 ## 组件范围
 
 - 操作：按钮、操作菜单

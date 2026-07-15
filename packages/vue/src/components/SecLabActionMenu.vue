@@ -12,7 +12,7 @@ import { computeFloatingPosition } from "../internal/floating-position";
 
 interface Action {
   label: string;
-  class?: string;
+  className?: string;
   icon?: string;
   disabled?: boolean;
   tooltip?: string;
@@ -162,7 +162,7 @@ onBeforeUnmount(() => {
               <button
                 class="sl-dropdown-item"
                 role="menuitem"
-                :class="[action.class, { 'is-disabled': action.disabled }]"
+                :class="[action.className, { 'is-disabled': action.disabled }]"
                 :disabled="action.disabled"
                 @click="handleActionClick(action)"
               >

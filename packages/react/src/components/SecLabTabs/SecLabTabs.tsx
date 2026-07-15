@@ -12,19 +12,16 @@ export interface SecLabTabsProps extends Omit<
   "onChange"
 > {
   /** 当前选中的标签页 name */
-  value?: string;
+  value: string;
   /** 标签页列表 */
   tabs: TabItem[];
-  /** 标签页改变事件 */
-  onTabChange?: (name: string) => void;
   /** 绑定值改变事件 */
   onChange?: (name: string) => void;
 }
 
 export const SecLabTabs: React.FC<SecLabTabsProps> = ({
-  value = "",
+  value,
   tabs = [],
-  onTabChange,
   onChange,
   className = "",
   ...rest
@@ -32,7 +29,6 @@ export const SecLabTabs: React.FC<SecLabTabsProps> = ({
   const handleTabClick = (tab: TabItem) => {
     if (tab.disabled) return;
     onChange?.(tab.name);
-    onTabChange?.(tab.name);
   };
   const handleKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,

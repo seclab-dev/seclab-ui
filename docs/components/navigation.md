@@ -3,13 +3,13 @@
 ## Tabs
 
 - **适用**：同一上下文中的并列视图；跨页面导航不使用。
-- **API**：当前值、`tabs` 和变化事件。
+- **API**：当前值、`tabs` 和单一变化事件。Vue 使用必填 `modelValue`、`update:modelValue/change`；React 使用必填 `value`、`onChange`。
 - **语义**：tablist/tab、`aria-selected`、roving tabindex；方向键/Home/End 切换并跳过禁用项。
 
 ## Menu
 
 - **适用**：应用或设置区域导航；对象操作集合使用 ActionMenu。
-- **API**：当前值、分组 items、变化事件和导航标签。
+- **API**：当前值、分组 items、变化事件和导航标签。Vue 使用必填 `modelValue`、`update:modelValue/change`；React 使用必填 `value`、`onChange`。
 - **语义**：`nav` + 原生按钮，当前项 `aria-current="page"`；方向键/Home/End 移动焦点。
 
 ## Breadcrumb

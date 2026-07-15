@@ -24,7 +24,7 @@ export interface SecLabDateTimeRangePickerProps extends Omit<
   "value" | "onChange"
 > {
   /** 绑定的时间范围，使用 Unix epoch milliseconds */
-  value?: DateTimeRangeValue;
+  value: DateTimeRangeValue;
   /** 占位文案 */
   placeholder?: string;
   /** 起始端标签 */
@@ -135,7 +135,7 @@ const DEFAULT_SHORTCUTS: ShortcutOption[] = [
 export const SecLabDateTimeRangePicker: React.FC<
   SecLabDateTimeRangePickerProps
 > = ({
-  value = { startAt: null, endAt: null },
+  value,
   placeholder = "请选择时间范围",
   startLabel = "开始时间",
   endLabel = "结束时间",

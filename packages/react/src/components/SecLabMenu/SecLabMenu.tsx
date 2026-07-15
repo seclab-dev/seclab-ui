@@ -17,19 +17,16 @@ export interface SecLabMenuProps extends Omit<
   "onChange" | "onSelect"
 > {
   /** 当前选中的菜单项 key */
-  value?: string;
+  value: string;
   /** 菜单项列表 (带分组) */
   items: MenuCategory[];
-  /** 选中事件 */
-  onSelect?: (key: string) => void;
   /** 绑定值改变事件 */
   onChange?: (key: string) => void;
 }
 
 export const SecLabMenu: React.FC<SecLabMenuProps> = ({
-  value = "",
+  value,
   items = [],
-  onSelect,
   onChange,
   className = "",
   ...rest
@@ -37,7 +34,6 @@ export const SecLabMenu: React.FC<SecLabMenuProps> = ({
   const menuRef = useRef<HTMLElement>(null);
   const handleSelect = (key: string) => {
     onChange?.(key);
-    onSelect?.(key);
   };
   const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;

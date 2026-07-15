@@ -7,7 +7,6 @@ import { computeFloatingPosition } from "../../internal/floating-position";
 
 export interface SecLabAction {
   label: string;
-  class?: string;
   className?: string;
   icon?: string;
   disabled?: boolean;
@@ -168,7 +167,7 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
             onKeyDown={handleMenuKeyDown}
           >
             {actions.map((action, index) => {
-              const itemClass = (action.className || action.class || "").trim();
+              const itemClass = (action.className || "").trim();
               const isDisabled = action.disabled;
               const buttonNode = (
                 <button

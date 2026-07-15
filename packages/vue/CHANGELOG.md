@@ -10,6 +10,7 @@
 
 ### Fixed
 
+- 统一受控输入、Menu、Tabs、Tooltip 与 ActionMenu 的跨框架公开契约，消除重复事件和配置字段差异。
 - `SecLabInput`、`SecLabCheckbox` 和 `SecLabSelect` 将字段标识与 ARIA 属性传递到真实控件，并在缺少 ID 时自动生成。
 - `SecLabSelect` 使用按钮触发器并支持原生表单值提交；`SecLabFormItem` 为标签、提示和错误提供稳定关联点。
 - `SecLabTooltip` 增加 tooltip 角色及触发器描述关联，辅助技术可以识别提示内容。

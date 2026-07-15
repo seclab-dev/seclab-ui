@@ -69,6 +69,8 @@ export default function SearchPanel() {
 
 `SecLabInput`、`SecLabCheckbox` 和 `SecLabSelect` 未提供 `id` 时会自动生成；参与原生表单提交时应提供 `name`。复杂控件可通过 `ariaLabelledby` 和 `ariaDescribedby` 显式关联 `SecLabFormItem` 的标签、提示与错误节点。
 
+受控组件的 `value`（Checkbox 为 `checked`）为必填，变化统一通过 `onChange` 返回。React DOM 属性使用 `readOnly`、`maxLength`、`autoComplete`、`htmlFor` 和 `className` 等惯用名称，不提供小写兼容别名；业务参数、默认值及配置对象字段与 Vue 契约保持一致。
+
 ## 组件范围
 
 - 操作：按钮、操作菜单

@@ -4,11 +4,14 @@ import SecLabCheckbox from "../../packages/vue/src/components/SecLabCheckbox.vue
 import SecLabFormItem from "../../packages/vue/src/components/SecLabFormItem.vue";
 import SecLabInput from "../../packages/vue/src/components/SecLabInput.vue";
 import SecLabLoading from "../../packages/vue/src/components/SecLabLoading.vue";
+import SecLabMenu from "../../packages/vue/src/components/SecLabMenu.vue";
 import SecLabModal from "../../packages/vue/src/components/SecLabModal.vue";
 import SecLabSelect from "../../packages/vue/src/components/SecLabSelect.vue";
 import SecLabSwitch from "../../packages/vue/src/components/SecLabSwitch.vue";
 import SecLabTable from "../../packages/vue/src/components/SecLabTable.vue";
+import SecLabTabs from "../../packages/vue/src/components/SecLabTabs.vue";
 import SecLabToast from "../../packages/vue/src/components/SecLabToast.vue";
+import SecLabTooltip from "../../packages/vue/src/components/SecLabTooltip.vue";
 
 afterEach(() => {
   document.body.innerHTML = "";
@@ -199,6 +202,57 @@ describe("Vue 公共组件行为", () => {
     ).toBeTruthy();
     expect(password.get('input[type="password"]').attributes("name")).toBe(
       "password",
+    );
+  });
+
+  it("Menu 与 Tabs 使用统一的 change 事件", async () => {
+    const menu = mount(SecLabMenu, {
+      props: {
+        modelValue: "overview",
+        items: [
+          {
+            key: "general",
+            label: "常规",
+            children: [{ key: "security", label: "安全" }],
+          },
+        ],
+      },
+    });
+    await menu.get("button").trigger("click");
+    expect(menu.emitted("update:modelValue")?.at(-1)).toEqual(["security"]);
+    expect(menu.emitted("change")?.at(-1)).toEqual(["security"]);
+    expect(menu.emitted("select")).toBeUndefined();
+
+    const tabs = mount(SecLabTabs, {
+      props: {
+        modelValue: "overview",
+        tabs: [
+          { name: "overview", label: "概览" },
+          { name: "detail", label: "详情" },
+        ],
+      },
+    });
+    await tabs.findAll("button")[1].trigger("click");
+    expect(tabs.emitted("update:modelValue")?.at(-1)).toEqual(["detail"]);
+    expect(tabs.emitted("change")?.at(-1)).toEqual(["detail"]);
+    expect(tabs.emitted("tab-change")).toBeUndefined();
+  });
+
+  it("Tooltip 禁用时不显示提示", async () => {
+    const wrapper = mount(SecLabTooltip, {
+      attachTo: document.body,
+      props: { text: "说明", delay: 0, disabled: true },
+      slots: { default: "触发器" },
+    });
+    await wrapper.trigger("mouseenter");
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(document.querySelector('[role="tooltip"]')).toBeNull();
+
+    await wrapper.setProps({ disabled: false });
+    await wrapper.trigger("mouseenter");
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(document.querySelector('[role="tooltip"]')?.textContent).toContain(
+      "说明",
     );
   });
 

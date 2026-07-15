@@ -12,11 +12,14 @@ import { SecLabCheckbox } from "../../packages/react/src/components/SecLabCheckb
 import { SecLabFormItem } from "../../packages/react/src/components/SecLabFormItem/SecLabFormItem";
 import { SecLabInput } from "../../packages/react/src/components/SecLabInput/SecLabInput";
 import { SecLabLoading } from "../../packages/react/src/components/SecLabLoading/SecLabLoading";
+import { SecLabMenu } from "../../packages/react/src/components/SecLabMenu/SecLabMenu";
 import { SecLabModal } from "../../packages/react/src/components/SecLabModal/SecLabModal";
 import { SecLabSelect } from "../../packages/react/src/components/SecLabSelect/SecLabSelect";
 import { SecLabSwitch } from "../../packages/react/src/components/SecLabSwitch/SecLabSwitch";
 import { SecLabTable } from "../../packages/react/src/components/SecLabTable/SecLabTable";
+import { SecLabTabs } from "../../packages/react/src/components/SecLabTabs/SecLabTabs";
 import { SecLabToast } from "../../packages/react/src/components/SecLabToast/SecLabToast";
+import { SecLabTooltip } from "../../packages/react/src/components/SecLabTooltip/SecLabTooltip";
 
 afterEach(cleanup);
 
@@ -240,6 +243,59 @@ describe("React 公共组件行为", () => {
     );
     expect(password?.id).not.toBe("");
     expect(password).toHaveAttribute("name", "password");
+  });
+
+  it("Menu 与 Tabs 仅通过 onChange 返回新值", async () => {
+    const menuChange = vi.fn();
+    const view = render(
+      <SecLabMenu
+        value="overview"
+        items={[
+          {
+            key: "general",
+            label: "常规",
+            children: [{ key: "security", label: "安全" }],
+          },
+        ]}
+        onChange={menuChange}
+      />,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "安全" }));
+    expect(menuChange).toHaveBeenCalledOnce();
+    expect(menuChange).toHaveBeenCalledWith("security");
+
+    const tabsChange = vi.fn();
+    view.rerender(
+      <SecLabTabs
+        value="overview"
+        tabs={[
+          { name: "overview", label: "概览" },
+          { name: "detail", label: "详情" },
+        ]}
+        onChange={tabsChange}
+      />,
+    );
+    await userEvent.click(screen.getByRole("tab", { name: "详情" }));
+    expect(tabsChange).toHaveBeenCalledOnce();
+    expect(tabsChange).toHaveBeenCalledWith("detail");
+  });
+
+  it("Tooltip 禁用时不显示提示", async () => {
+    const view = render(
+      <SecLabTooltip text="说明" delay={0} disabled>
+        <button type="button">触发器</button>
+      </SecLabTooltip>,
+    );
+    await userEvent.hover(screen.getByRole("button", { name: "触发器" }));
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+
+    view.rerender(
+      <SecLabTooltip text="说明" delay={0}>
+        <button type="button">触发器</button>
+      </SecLabTooltip>,
+    );
+    await userEvent.hover(screen.getByRole("button", { name: "触发器" }));
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("说明");
   });
 
   it("Table 累计固定列偏移", () => {

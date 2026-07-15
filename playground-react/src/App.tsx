@@ -160,7 +160,7 @@ function App() {
     {
       label: "启动服务",
       icon: "status-running",
-      class: "app-btn-start",
+      className: "app-btn-start",
       handler: () => {
         addToast("success", "指令已发送", "服务启动指令下发成功。");
       },
@@ -168,7 +168,7 @@ function App() {
     {
       label: "暂停服务",
       icon: "settings",
-      class: "app-btn-stop",
+      className: "app-btn-stop",
       handler: () => {
         addToast("warning", "指令已发送", "服务暂停指令下发成功。");
       },
@@ -176,7 +176,7 @@ function App() {
     {
       label: "删除容器",
       icon: "trash",
-      class: "app-btn-delete",
+      className: "app-btn-delete",
       handler: () => {
         addToast("error", "删除警告", "此操作无法撤销。");
       },

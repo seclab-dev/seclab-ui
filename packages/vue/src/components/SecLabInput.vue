@@ -25,11 +25,11 @@ interface Props {
   /** 是否显示密码切换按钮 */
   showPassword?: boolean;
   /** 最小值 (仅 number 有效) */
-  min?: number;
+  min?: number | string;
   /** 最大值 (仅 number 有效) */
-  max?: number;
+  max?: number | string;
   /** 步长 (仅 number 有效) */
-  step?: number;
+  step?: number | string;
   /** 自动填充属性 */
   autocomplete?: string;
   id?: string;

@@ -27,12 +27,12 @@ defineProps<Props>();
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: string): void;
-  (e: "select", value: string): void;
+  (e: "change", value: string): void;
 }>();
 
 function handleSelect(key: string) {
   emit("update:modelValue", key);
-  emit("select", key);
+  emit("change", key);
 }
 const menuRef = ref<HTMLElement | null>(null);
 function handleKeydown(event: KeyboardEvent) {

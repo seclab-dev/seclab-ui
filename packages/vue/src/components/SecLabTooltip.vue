@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
 
 /**
  * @file SecLabTooltip.vue
@@ -16,10 +16,13 @@ const props = withDefaults(
     position?: TooltipPosition;
     /** 显示延迟 (ms) */
     delay?: number;
+    /** 是否禁用 */
+    disabled?: boolean;
   }>(),
   {
     position: "top",
     delay: 200,
+    disabled: false,
   },
 );
 
@@ -122,6 +125,7 @@ const calculatePosition = () => {
 // --- 悬浮控制逻辑 ---
 
 const handleMouseEnter = () => {
+  if (props.disabled) return;
   clearTimeout(timer);
   timer = setTimeout(() => {
     isVisible.value = true;
@@ -130,6 +134,15 @@ const handleMouseEnter = () => {
     });
   }, props.delay) as unknown as number;
 };
+
+watch(
+  () => props.disabled,
+  (disabled) => {
+    if (!disabled) return;
+    clearTimeout(timer);
+    isVisible.value = false;
+  },
+);
 
 const handleMouseLeave = () => {
   clearTimeout(timer);
@@ -152,7 +165,7 @@ onUnmounted(() => {
   <div
     class="sl-tooltip-wrapper"
     ref="triggerRef"
-    :aria-describedby="isVisible && text ? tooltipId : undefined"
+    :aria-describedby="isVisible && text && !disabled ? tooltipId : undefined"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
   >
@@ -160,7 +173,7 @@ onUnmounted(() => {
     <teleport to="body">
       <Transition name="sl-tooltip-fade">
         <div
-          v-if="isVisible && text"
+          v-if="isVisible && text && !disabled"
           ref="tooltipRef"
           :id="tooltipId"
           class="sl-tooltip-content"

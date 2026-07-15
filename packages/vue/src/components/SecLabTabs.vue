@@ -21,13 +21,13 @@ const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: string): void;
-  (e: "tab-change", value: string): void;
+  (e: "change", value: string): void;
 }>();
 
 function handleTabClick(tab: TabItem) {
   if (tab.disabled) return;
   emit("update:modelValue", tab.name);
-  emit("tab-change", tab.name);
+  emit("change", tab.name);
 }
 function handleKeydown(event: KeyboardEvent, index: number) {
   if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
