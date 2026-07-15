@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import { SecLabIcon } from "../SecLabIcon/SecLabIcon";
 import "./SecLabInput.css";
 
@@ -6,7 +6,14 @@ export interface SecLabInputProps<
   T extends string | number | null = string,
 > extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
-  "value" | "onChange" | "onFocus" | "onBlur"
+  | "value"
+  | "onChange"
+  | "onFocus"
+  | "onBlur"
+  | "id"
+  | "aria-label"
+  | "aria-labelledby"
+  | "aria-describedby"
 > {
   /** 绑定值 */
   value?: T;
@@ -38,7 +45,10 @@ export interface SecLabInputProps<
   /** 值改变事件 */
   onChange?: (value: T) => void;
   invalid?: boolean;
-  inputId?: string;
+  id?: string;
+  name?: string;
+  ariaLabel?: string;
+  ariaLabelledby?: string;
   ariaDescribedby?: string;
   /** focus 事件 */
   onFocus?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
@@ -66,12 +76,17 @@ export function SecLabInput<T extends string | number | null = string>({
   onFocus,
   onBlur,
   invalid = false,
-  inputId,
+  id,
+  name,
+  ariaLabel,
+  ariaLabelledby,
   ariaDescribedby,
   className = "",
   ...rest
 }: SecLabInputProps<T>) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const generatedId = useId();
+  const resolvedId = id ?? generatedId;
 
   const handleInput = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -107,7 +122,10 @@ export function SecLabInput<T extends string | number | null = string>({
       {type === "textarea" ? (
         <textarea
           className="sl-textarea"
-          id={inputId}
+          id={resolvedId}
+          name={name}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledby}
           aria-describedby={ariaDescribedby}
           value={displayValue}
           placeholder={placeholder}
@@ -124,7 +142,10 @@ export function SecLabInput<T extends string | number | null = string>({
         <div className="sl-input-inner-wrapper">
           <input
             className="sl-input"
-            id={inputId}
+            id={resolvedId}
+            name={name}
+            aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledby}
             aria-describedby={ariaDescribedby}
             type={inputType}
             value={displayValue}

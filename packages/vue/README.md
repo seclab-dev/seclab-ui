@@ -29,19 +29,41 @@ pnpm add vue
 
 ```vue
 <script setup lang="ts">
-import { SecLabButton, SecLabIcon, SecLabInput } from "@seclab-dev/vue";
+import {
+  SecLabButton,
+  SecLabFormItem,
+  SecLabIcon,
+  SecLabInput,
+} from "@seclab-dev/vue";
 
 const keyword = defineModel<string>({ default: "" });
 </script>
 
 <template>
-  <SecLabInput v-model="keyword" placeholder="搜索" />
+  <SecLabFormItem
+    label="关键词"
+    for="search-keyword"
+    label-id="search-keyword-label"
+    hint="输入名称或标识"
+    hint-id="search-keyword-hint"
+  >
+    <SecLabInput
+      id="search-keyword"
+      v-model="keyword"
+      name="keyword"
+      aria-labelledby="search-keyword-label"
+      aria-describedby="search-keyword-hint"
+      placeholder="搜索"
+    />
+  </SecLabFormItem>
   <SecLabButton type="primary">
     <SecLabIcon name="search" :size="16" />
     查询
   </SecLabButton>
 </template>
 ```
+
+`SecLabInput`、`SecLabCheckbox` 和 `SecLabSelect` 未提供 `id` 时会自动生成；参与原生表单提交时应提供 `name`。复杂控件可通过 `aria-labelledby` 和 `aria-describedby` 显式关联 `SecLabFormItem` 的标签、提示与错误节点。
 
 ## 组件范围
 

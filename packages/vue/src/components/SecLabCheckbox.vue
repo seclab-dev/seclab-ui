@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { computed, ref, useId, watchEffect } from "vue";
 /**
  * @file SecLabCheckbox.vue
  * @description SecLab 平台自研复选框组件，严格遵循 SDL 设计规范。
@@ -11,6 +11,11 @@ interface Props {
   /** 禁用状态 */
   disabled?: boolean;
   indeterminate?: boolean;
+  id?: string;
+  name?: string;
+  ariaLabel?: string;
+  ariaLabelledby?: string;
+  ariaDescribedby?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -22,6 +27,8 @@ const emit = defineEmits<{
   (e: "change", value: boolean): void;
 }>();
 const inputRef = ref<HTMLInputElement | null>(null);
+const generatedId = useId();
+const resolvedId = computed(() => props.id ?? generatedId);
 watchEffect(() => {
   if (inputRef.value)
     inputRef.value.indeterminate = Boolean(props.indeterminate);
@@ -38,15 +45,21 @@ function toggle() {
 <template>
   <label
     class="sl-checkbox"
+    :for="resolvedId"
     :class="{ 'is-active': modelValue, 'is-disabled': disabled }"
   >
     <span class="sl-checkbox-input">
       <input
         ref="inputRef"
+        :id="resolvedId"
+        :name="name"
         type="checkbox"
         class="sl-checkbox-original"
         :checked="modelValue"
         :disabled="disabled"
+        :aria-label="ariaLabel"
+        :aria-labelledby="ariaLabelledby"
+        :aria-describedby="ariaDescribedby"
         :aria-checked="indeterminate ? 'mixed' : modelValue"
         @change="toggle"
       />

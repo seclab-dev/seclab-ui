@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed, useId } from "vue";
+
 /**
  * @file SecLabFormItem.vue
  * @description SecLab 平台自研表单项组件，处理标签和布局。
@@ -13,22 +15,40 @@ interface Props {
   hint?: string;
   for?: string;
   error?: string;
+  labelId?: string;
   hintId?: string;
+  errorId?: string;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+const generatedId = useId();
+const resolvedLabelId = computed(() => props.labelId ?? `${generatedId}-label`);
+const resolvedHintId = computed(() => props.hintId ?? `${generatedId}-hint`);
+const resolvedErrorId = computed(() => props.errorId ?? `${generatedId}-error`);
 </script>
 
 <template>
   <div class="sl-form-item">
-    <label v-if="label" class="sl-form-item-label" :for="for">
+    <label
+      v-if="label"
+      :id="resolvedLabelId"
+      class="sl-form-item-label"
+      :for="for"
+    >
       <span v-if="required" class="sl-form-item-required">*</span>
       {{ label }}
     </label>
     <div class="sl-form-item-content">
       <slot></slot>
-      <div v-if="hint" :id="hintId" class="sl-form-item-hint">{{ hint }}</div>
-      <div v-if="error" class="sl-form-item-error" role="alert">
+      <div v-if="hint" :id="resolvedHintId" class="sl-form-item-hint">
+        {{ hint }}
+      </div>
+      <div
+        v-if="error"
+        :id="resolvedErrorId"
+        class="sl-form-item-error"
+        role="alert"
+      >
         {{ error }}
       </div>
     </div>

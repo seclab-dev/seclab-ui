@@ -29,14 +29,35 @@ pnpm add react react-dom
 
 ```tsx
 import { useState } from "react";
-import { SecLabButton, SecLabIcon, SecLabInput } from "@seclab-dev/react";
+import {
+  SecLabButton,
+  SecLabFormItem,
+  SecLabIcon,
+  SecLabInput,
+} from "@seclab-dev/react";
 
 export default function SearchPanel() {
   const [keyword, setKeyword] = useState("");
 
   return (
     <div>
-      <SecLabInput value={keyword} onChange={setKeyword} placeholder="搜索" />
+      <SecLabFormItem
+        label="关键词"
+        htmlFor="search-keyword"
+        labelId="search-keyword-label"
+        hint="输入名称或标识"
+        hintId="search-keyword-hint"
+      >
+        <SecLabInput
+          id="search-keyword"
+          value={keyword}
+          name="keyword"
+          ariaLabelledby="search-keyword-label"
+          ariaDescribedby="search-keyword-hint"
+          onChange={setKeyword}
+          placeholder="搜索"
+        />
+      </SecLabFormItem>
       <SecLabButton type="primary">
         <SecLabIcon name="search" size={16} />
         查询
@@ -45,6 +66,8 @@ export default function SearchPanel() {
   );
 }
 ```
+
+`SecLabInput`、`SecLabCheckbox` 和 `SecLabSelect` 未提供 `id` 时会自动生成；参与原生表单提交时应提供 `name`。复杂控件可通过 `ariaLabelledby` 和 `ariaDescribedby` 显式关联 `SecLabFormItem` 的标签、提示与错误节点。
 
 ## 组件范围
 

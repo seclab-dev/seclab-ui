@@ -27,10 +27,46 @@ describe("Vue 公共组件行为", () => {
       },
     });
     const combobox = wrapper.get('[role="combobox"]');
+    expect(combobox.attributes("id")).toBeTruthy();
     await combobox.trigger("keydown", { key: "Enter" });
     expect(document.querySelector('[role="listbox"]')).not.toBeNull();
     await combobox.trigger("keydown", { key: "Enter" });
     expect(wrapper.emitted("update:modelValue")?.at(-1)).toEqual(["enabled"]);
+  });
+
+  it("Select 将字段标识和表单值绑定到按钮与隐藏字段", async () => {
+    const form = document.createElement("form");
+    document.body.append(form);
+    const wrapper = mount(SecLabSelect, {
+      attachTo: form,
+      props: {
+        id: "region",
+        name: "region",
+        ariaLabel: "区域",
+        ariaLabelledby: "region-label",
+        ariaDescribedby: "region-hint",
+        modelValue: "cn-east",
+        options: [{ label: "华东", value: "cn-east" }],
+      },
+      attrs: { "data-slot": "region-field" },
+    });
+    const combobox = wrapper.get('[role="combobox"]');
+    expect(combobox.element.tagName).toBe("BUTTON");
+    expect(combobox.attributes()).toMatchObject({
+      id: "region",
+      "aria-label": "区域",
+      "aria-labelledby": "region-label",
+      "aria-describedby": "region-hint",
+    });
+    expect(wrapper.attributes("data-slot")).toBe("region-field");
+    expect(wrapper.attributes("id")).toBeUndefined();
+    expect(new FormData(form).get("region")).toBe("cn-east");
+
+    await wrapper.setProps({ modelValue: null });
+    expect(new FormData(form).get("region")).toBe("");
+    await wrapper.setProps({ disabled: true });
+    expect(combobox.attributes("disabled")).toBeDefined();
+    expect(new FormData(form).has("region")).toBe(false);
   });
 
   it("Modal 限制焦点、响应 Escape 并恢复触发器焦点", async () => {
@@ -63,12 +99,58 @@ describe("Vue 公共组件行为", () => {
     expect(checkbox.get("input").attributes("aria-checked")).toBe("mixed");
   });
 
+  it("Checkbox 将字段标识传递到原生复选框", async () => {
+    const wrapper = mount(SecLabCheckbox, {
+      attachTo: document.body,
+      props: {
+        id: "cleanup",
+        name: "cleanup",
+        ariaLabel: "清理缓存",
+        ariaLabelledby: "cleanup-label",
+        ariaDescribedby: "cleanup-hint",
+        modelValue: false,
+      },
+      slots: { default: "清理" },
+    });
+    const input = wrapper.get("input");
+    expect(wrapper.get("label").attributes("for")).toBe("cleanup");
+    expect(input.attributes()).toMatchObject({
+      id: "cleanup",
+      name: "cleanup",
+      "aria-label": "清理缓存",
+      "aria-labelledby": "cleanup-label",
+      "aria-describedby": "cleanup-hint",
+    });
+    wrapper.get("label").element.click();
+    await wrapper.vm.$nextTick();
+    expect(wrapper.emitted("change")?.at(-1)).toEqual([true]);
+
+    const automatic = mount(SecLabCheckbox, { props: { modelValue: false } });
+    expect(automatic.get("input").attributes("id")).toBeTruthy();
+    expect(automatic.get("label").attributes("for")).toBe(
+      automatic.get("input").attributes("id"),
+    );
+  });
+
   it("FormItem 关联 label、hint 与 error", () => {
     const wrapper = mount(SecLabFormItem, {
-      props: { label: "端口", for: "port", hint: "1-65535", error: "无效端口" },
+      props: {
+        label: "端口",
+        for: "port",
+        hint: "1-65535",
+        error: "无效端口",
+        labelId: "port-label",
+        hintId: "port-hint",
+        errorId: "port-error",
+      },
       slots: { default: '<input id="port" />' },
     });
     expect(wrapper.get("label").attributes("for")).toBe("port");
+    expect(wrapper.get("label").attributes("id")).toBe("port-label");
+    expect(wrapper.get(".sl-form-item-hint").attributes("id")).toBe(
+      "port-hint",
+    );
+    expect(wrapper.get('[role="alert"]').attributes("id")).toBe("port-error");
     expect(wrapper.get('[role="alert"]').text()).toBe("无效端口");
   });
 
@@ -79,6 +161,45 @@ describe("Vue 公共组件行为", () => {
     await wrapper.get("input").setValue("42");
     await wrapper.get("input").setValue("");
     expect(wrapper.emitted("update:modelValue")).toEqual([[42], [null]]);
+  });
+
+  it("Input 将字段标识传递到真实输入控件", () => {
+    const wrapper = mount(SecLabInput, {
+      props: {
+        id: "username",
+        name: "username",
+        ariaLabel: "用户名",
+        ariaLabelledby: "username-label",
+        ariaDescribedby: "username-hint",
+        modelValue: "admin",
+      },
+      attrs: { "data-slot": "username-field" },
+    });
+    expect(wrapper.get("input").attributes()).toMatchObject({
+      id: "username",
+      name: "username",
+      "aria-label": "用户名",
+      "aria-labelledby": "username-label",
+      "aria-describedby": "username-hint",
+    });
+    expect(wrapper.attributes("data-slot")).toBe("username-field");
+    expect(wrapper.attributes("id")).toBeUndefined();
+
+    const textarea = mount(SecLabInput, {
+      props: { modelValue: "", type: "textarea", name: "description" },
+    });
+    expect(textarea.get("textarea").attributes("id")).toBeTruthy();
+    expect(textarea.get("textarea").attributes("name")).toBe("description");
+
+    const password = mount(SecLabInput, {
+      props: { modelValue: "secret", type: "password", name: "password" },
+    });
+    expect(
+      password.get('input[type="password"]').attributes("id"),
+    ).toBeTruthy();
+    expect(password.get('input[type="password"]').attributes("name")).toBe(
+      "password",
+    );
   });
 
   it("Table 使用稳定行键并累计固定列偏移", () => {

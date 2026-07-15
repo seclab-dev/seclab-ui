@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { computed, ref, useId } from "vue";
+import SecLabIcon from "./SecLabIcon.vue";
+
 /**
  * @file SecLabInput.vue
  * @description SecLab 平台自研输入框组件，严格遵循 SDL 设计规范。
@@ -30,6 +33,9 @@ interface Props {
   /** 自动填充属性 */
   autocomplete?: string;
   id?: string;
+  name?: string;
+  ariaLabel?: string;
+  ariaLabelledby?: string;
   ariaDescribedby?: string;
   invalid?: boolean;
 }
@@ -49,9 +55,9 @@ const emit = defineEmits<{
   (e: "change", value: string | number | null): void;
 }>();
 
-import { ref, computed } from "vue";
-import SecLabIcon from "./SecLabIcon.vue";
 const isPasswordVisible = ref(false);
+const generatedId = useId();
+const resolvedId = computed(() => props.id ?? generatedId);
 
 function handleInput(event: Event) {
   const target = event.target as HTMLInputElement | HTMLTextAreaElement;
@@ -97,7 +103,10 @@ const inputType = computed(() => {
     <template v-if="type === 'textarea'">
       <textarea
         class="sl-textarea"
-        :id="id"
+        :id="resolvedId"
+        :name="name"
+        :aria-label="ariaLabel"
+        :aria-labelledby="ariaLabelledby"
         :aria-describedby="ariaDescribedby"
         :aria-invalid="invalid || undefined"
         :value="modelValue?.toString()"
@@ -116,7 +125,10 @@ const inputType = computed(() => {
       <div class="sl-input-inner-wrapper">
         <input
           class="sl-input"
-          :id="id"
+          :id="resolvedId"
+          :name="name"
+          :aria-label="ariaLabel"
+          :aria-labelledby="ariaLabelledby"
           :aria-describedby="ariaDescribedby"
           :aria-invalid="invalid || undefined"
           :type="inputType"

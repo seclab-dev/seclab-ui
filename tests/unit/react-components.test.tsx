@@ -31,10 +31,60 @@ describe("React 公共组件行为", () => {
       />,
     );
     const combobox = screen.getByRole("combobox");
+    expect(combobox.id).not.toBe("");
     await userEvent.type(combobox, "{enter}");
     await userEvent.type(combobox, "{enter}");
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
     expect(onChange).toHaveBeenCalledWith("enabled");
+  });
+
+  it("Select 将字段标识和表单值绑定到按钮与隐藏字段", () => {
+    const view = render(
+      <form data-testid="form">
+        <SecLabSelect
+          id="region"
+          name="region"
+          ariaLabel="区域"
+          ariaLabelledby="region-label"
+          ariaDescribedby="region-hint"
+          value="cn-east"
+          options={[{ label: "华东", value: "cn-east" }]}
+          data-slot="region-field"
+        />
+      </form>,
+    );
+    const combobox = screen.getByRole("combobox");
+    expect(combobox.tagName).toBe("BUTTON");
+    expect(combobox).toHaveAttribute("id", "region");
+    expect(combobox).toHaveAttribute("aria-label", "区域");
+    expect(combobox).toHaveAttribute("aria-labelledby", "region-label");
+    expect(combobox).toHaveAttribute("aria-describedby", "region-hint");
+    expect(combobox.closest(".sl-select")).toHaveAttribute(
+      "data-slot",
+      "region-field",
+    );
+    expect(combobox.closest(".sl-select")).not.toHaveAttribute("id");
+    expect(
+      new FormData(screen.getByTestId("form") as HTMLFormElement).get("region"),
+    ).toBe("cn-east");
+
+    view.rerender(
+      <form data-testid="form">
+        <SecLabSelect name="region" value={null} options={[]} />
+      </form>,
+    );
+    expect(
+      new FormData(screen.getByTestId("form") as HTMLFormElement).get("region"),
+    ).toBe("");
+    view.rerender(
+      <form data-testid="form">
+        <SecLabSelect name="region" value={null} disabled options={[]} />
+      </form>,
+    );
+    expect(screen.getByRole("combobox")).toBeDisabled();
+    expect(
+      new FormData(screen.getByTestId("form") as HTMLFormElement).has("region"),
+    ).toBe(false);
   });
 
   it("Modal 响应 Escape 并恢复触发器焦点", async () => {
@@ -81,6 +131,37 @@ describe("React 公共组件行为", () => {
     expect(screen.getByRole("checkbox")).toBePartiallyChecked();
   });
 
+  it("Checkbox 将字段标识传递到原生复选框", async () => {
+    const onChange = vi.fn();
+    const view = render(
+      <SecLabCheckbox
+        id="cleanup"
+        name="cleanup"
+        ariaLabel="清理缓存"
+        ariaLabelledby="cleanup-label"
+        ariaDescribedby="cleanup-hint"
+        checked={false}
+        onChange={onChange}
+      >
+        清理
+      </SecLabCheckbox>,
+    );
+    const checkbox = screen.getByRole("checkbox");
+    expect(checkbox).toHaveAttribute("id", "cleanup");
+    expect(checkbox).toHaveAttribute("name", "cleanup");
+    expect(checkbox).toHaveAttribute("aria-label", "清理缓存");
+    expect(checkbox).toHaveAttribute("aria-labelledby", "cleanup-label");
+    expect(checkbox).toHaveAttribute("aria-describedby", "cleanup-hint");
+    expect(checkbox.closest("label")).toHaveAttribute("for", "cleanup");
+    await userEvent.click(screen.getByText("清理"));
+    expect(onChange).toHaveBeenCalledWith(true);
+
+    view.rerender(<SecLabCheckbox checked={false}>自动标识</SecLabCheckbox>);
+    const automatic = screen.getByRole("checkbox");
+    expect(automatic.id).not.toBe("");
+    expect(automatic.closest("label")).toHaveAttribute("for", automatic.id);
+  });
+
   it("FormItem 关联 label、hint 与 error", () => {
     render(
       <SecLabFormItem
@@ -88,11 +169,20 @@ describe("React 公共组件行为", () => {
         htmlFor="port"
         hint="1-65535"
         error="无效端口"
+        labelId="port-label"
+        hintId="port-hint"
+        errorId="port-error"
       >
         <input id="port" />
       </SecLabFormItem>,
     );
     expect(screen.getByLabelText("端口")).toHaveAttribute("id", "port");
+    expect(screen.getByText("端口").closest("label")).toHaveAttribute(
+      "id",
+      "port-label",
+    );
+    expect(screen.getByText("1-65535")).toHaveAttribute("id", "port-hint");
+    expect(screen.getByRole("alert")).toHaveAttribute("id", "port-error");
     expect(screen.getByRole("alert")).toHaveTextContent("无效端口");
   });
 
@@ -111,6 +201,45 @@ describe("React 公共组件行为", () => {
     fireEvent.change(screen.getByRole("spinbutton"), { target: { value: "" } });
     expect(onChange).toHaveBeenNthCalledWith(1, 42);
     expect(onChange).toHaveBeenNthCalledWith(2, null);
+  });
+
+  it("Input 将字段标识传递到真实输入控件", () => {
+    const view = render(
+      <SecLabInput
+        id="username"
+        name="username"
+        ariaLabel="用户名"
+        ariaLabelledby="username-label"
+        ariaDescribedby="username-hint"
+        value="admin"
+        data-slot="username-field"
+      />,
+    );
+    const input = screen.getByRole("textbox");
+    expect(input).toHaveAttribute("id", "username");
+    expect(input).toHaveAttribute("name", "username");
+    expect(input).toHaveAttribute("aria-label", "用户名");
+    expect(input).toHaveAttribute("aria-labelledby", "username-label");
+    expect(input).toHaveAttribute("aria-describedby", "username-hint");
+    expect(input.closest(".sl-input-wrapper")).toHaveAttribute(
+      "data-slot",
+      "username-field",
+    );
+    expect(input.closest(".sl-input-wrapper")).not.toHaveAttribute("id");
+
+    view.rerender(<SecLabInput type="textarea" name="description" value="" />);
+    const textarea = screen.getByRole("textbox");
+    expect(textarea.id).not.toBe("");
+    expect(textarea).toHaveAttribute("name", "description");
+
+    view.rerender(
+      <SecLabInput type="password" name="password" value="secret" />,
+    );
+    const password = document.querySelector<HTMLInputElement>(
+      'input[type="password"]',
+    );
+    expect(password?.id).not.toBe("");
+    expect(password).toHaveAttribute("name", "password");
   });
 
   it("Table 累计固定列偏移", () => {

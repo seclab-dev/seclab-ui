@@ -17,6 +17,10 @@
   cursor: pointer;
   user-select: none;
   transition: all 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  text-align: left;
 }
 
 .sl-select.is-disabled .sl-select-trigger {

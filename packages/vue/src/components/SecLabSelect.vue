@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, computed, nextTick } from "vue";
+import {
+  ref,
+  watch,
+  onMounted,
+  onUnmounted,
+  computed,
+  nextTick,
+  useId,
+} from "vue";
 import { computeFloatingPosition } from "../internal/floating-position";
 
 /**
@@ -23,6 +31,11 @@ const props = defineProps<{
   placeholder?: string;
   /** 是否禁用 */
   disabled?: boolean;
+  id?: string;
+  name?: string;
+  ariaLabel?: string;
+  ariaLabelledby?: string;
+  ariaDescribedby?: string;
 }>();
 
 const emit = defineEmits<{
@@ -38,7 +51,9 @@ const selectRef = ref<HTMLElement | null>(null);
 const dropdownRef = ref<HTMLElement | null>(null);
 const dropdownPlacement = ref<"top" | "bottom">("bottom");
 const activeIndex = ref(-1);
-const listboxId = `sl-select-listbox-${Math.random().toString(36).slice(2)}`;
+const generatedId = useId();
+const resolvedId = computed(() => props.id ?? generatedId);
+const listboxId = `${generatedId}-listbox`;
 const dropdownStyle = ref<Record<string, string>>({
   visibility: "hidden",
 });
@@ -188,10 +203,15 @@ onUnmounted(() => {
     :class="{ 'is-open': isOpen, 'is-disabled': disabled }"
     ref="selectRef"
   >
-    <div
+    <button
+      :id="resolvedId"
+      type="button"
       class="sl-select-trigger"
       role="combobox"
-      tabindex="0"
+      :disabled="disabled"
+      :aria-label="ariaLabel"
+      :aria-labelledby="ariaLabelledby"
+      :aria-describedby="ariaDescribedby"
       :aria-expanded="isOpen"
       :aria-controls="listboxId"
       aria-haspopup="listbox"
@@ -200,7 +220,14 @@ onUnmounted(() => {
     >
       <span class="sl-select-label">{{ selectedLabel }}</span>
       <span class="sl-select-arrow"></span>
-    </div>
+    </button>
+    <input
+      v-if="name"
+      type="hidden"
+      :name="name"
+      :value="modelValue ?? ''"
+      :disabled="disabled"
+    />
     <teleport to="body">
       <Transition name="sl-select-fade">
         <ul
@@ -260,6 +287,10 @@ onUnmounted(() => {
   cursor: pointer;
   user-select: none;
   transition: all 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  text-align: left;
 }
 
 .sl-select.is-disabled .sl-select-trigger {

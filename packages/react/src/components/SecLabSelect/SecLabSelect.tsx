@@ -20,7 +20,12 @@ export interface SecLabSelectOption {
 
 export interface SecLabSelectProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
-  "value" | "onChange"
+  | "value"
+  | "onChange"
+  | "id"
+  | "aria-label"
+  | "aria-labelledby"
+  | "aria-describedby"
 > {
   /** 绑定值 */
   value: string | number | null;
@@ -30,6 +35,11 @@ export interface SecLabSelectProps extends Omit<
   placeholder?: string;
   /** 是否禁用 */
   disabled?: boolean;
+  id?: string;
+  name?: string;
+  ariaLabel?: string;
+  ariaLabelledby?: string;
+  ariaDescribedby?: string;
   /** 改变值时的回调 */
   onChange?: (value: string | number | null) => void;
   /** 禁用选项被点击时的回调 */
@@ -49,6 +59,11 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
   options,
   placeholder = "请选择",
   disabled = false,
+  id,
+  name,
+  ariaLabel,
+  ariaLabelledby,
+  ariaDescribedby,
   onChange,
   onOptionDisabled,
   onDropdownScroll,
@@ -67,7 +82,9 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
   const selectRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLUListElement>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
-  const listboxId = useId();
+  const generatedId = useId();
+  const resolvedId = id ?? generatedId;
+  const listboxId = `${generatedId}-listbox`;
 
   const selectedLabel = useMemo(() => {
     const selectedOption = options.find((opt) => opt.value === value);
@@ -151,7 +168,7 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
     }
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     if (disabled) return;
     if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
       event.preventDefault();
@@ -206,10 +223,15 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
       ref={selectRef}
       {...rest}
     >
-      <div
+      <button
+        id={resolvedId}
+        type="button"
         className="sl-select-trigger"
         role="combobox"
-        tabIndex={disabled ? -1 : 0}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledby}
+        aria-describedby={ariaDescribedby}
         aria-expanded={isOpen}
         aria-controls={listboxId}
         aria-haspopup="listbox"
@@ -218,7 +240,15 @@ export const SecLabSelect: React.FC<SecLabSelectProps> = ({
       >
         <span className="sl-select-label">{selectedLabel}</span>
         <span className="sl-select-arrow"></span>
-      </div>
+      </button>
+      {name ? (
+        <input
+          type="hidden"
+          name={name}
+          value={value ?? ""}
+          disabled={disabled}
+        />
+      ) : null}
 
       {isOpen &&
         createPortal(

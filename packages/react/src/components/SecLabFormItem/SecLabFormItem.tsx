@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import "./SecLabFormItem.css";
 
 export interface SecLabFormItemProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -10,7 +10,9 @@ export interface SecLabFormItemProps extends React.HTMLAttributes<HTMLDivElement
   hint?: string;
   htmlFor?: string;
   error?: string;
+  labelId?: string;
   hintId?: string;
+  errorId?: string;
 }
 
 export const SecLabFormItem: React.FC<SecLabFormItemProps> = ({
@@ -19,15 +21,26 @@ export const SecLabFormItem: React.FC<SecLabFormItemProps> = ({
   hint,
   htmlFor,
   error,
+  labelId,
   hintId,
+  errorId,
   className = "",
   children,
   ...rest
 }) => {
+  const generatedId = useId();
+  const resolvedLabelId = labelId ?? `${generatedId}-label`;
+  const resolvedHintId = hintId ?? `${generatedId}-hint`;
+  const resolvedErrorId = errorId ?? `${generatedId}-error`;
+
   return (
     <div className={`sl-form-item ${className}`.trim()} {...rest}>
       {label && (
-        <label className="sl-form-item-label" htmlFor={htmlFor}>
+        <label
+          id={resolvedLabelId}
+          className="sl-form-item-label"
+          htmlFor={htmlFor}
+        >
           {required && <span className="sl-form-item-required">*</span>}
           {label}
         </label>
@@ -35,12 +48,12 @@ export const SecLabFormItem: React.FC<SecLabFormItemProps> = ({
       <div className="sl-form-item-content">
         {children}
         {hint && (
-          <div id={hintId} className="sl-form-item-hint">
+          <div id={resolvedHintId} className="sl-form-item-hint">
             {hint}
           </div>
         )}
         {error && (
-          <div className="sl-form-item-error" role="alert">
+          <div id={resolvedErrorId} className="sl-form-item-error" role="alert">
             {error}
           </div>
         )}

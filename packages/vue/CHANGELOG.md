@@ -10,6 +10,8 @@
 
 ### Fixed
 
+- `SecLabInput`、`SecLabCheckbox` 和 `SecLabSelect` 将字段标识与 ARIA 属性传递到真实控件，并在缺少 ID 时自动生成。
+- `SecLabSelect` 使用按钮触发器并支持原生表单值提交；`SecLabFormItem` 为标签、提示和错误提供稳定关联点。
 - `SecLabTooltip` 增加 tooltip 角色及触发器描述关联，辅助技术可以识别提示内容。
 - `SecLabActionMenu` 的触发器和菜单项统一使用 SDL 字体，修复 Portal 场景下中文缺字。
 
