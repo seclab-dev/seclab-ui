@@ -87,15 +87,11 @@ const bridge = createSuiteBridge({
 });
 
 const delivered = bridge.navigate({
-  target: "app",
-  value: "web-browser",
-  payload: {
-    html: "<h1>Preview</h1>",
-  },
+  target: "suite-center",
 });
 
 if (!delivered) {
-  openLocalPreviewWindow("<h1>Preview</h1>");
+  showLocalNavigationHint();
 }
 ```
 

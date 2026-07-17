@@ -2,6 +2,12 @@
 
 格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，并遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## [Unreleased]
+
+### Changed
+
+- 导航示例改为打开套件中心，不再示范通过主控应用传递和渲染 HTML 内容。
+
 ## [0.1.0-alpha.2] - 2026-07-08
 
 ### Added
