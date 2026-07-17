@@ -41,7 +41,7 @@
   border: 1px solid var(--sdl-border-strong);
   border-radius: var(--sdl-radius-md);
   box-shadow: var(--sdl-shadow-panel);
-  z-index: var(--sdl-z-index-popover);
+  z-index: calc(var(--sdl-z-index-modal) + 1);
   min-width: 140px;
   padding: var(--sdl-space-1);
   max-height: 260px;

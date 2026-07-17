@@ -53,6 +53,31 @@ for (const app of apps)
       await expect(drawerTrigger).toBeFocused();
     });
 
+    test("ActionMenu 显示在模态层之上", async ({ page }) => {
+      await openApp(page, app.url);
+      await page.getByRole("button", { name: "打开右侧抽屉 (Drawer)" }).click();
+      const drawer = page.getByRole("dialog", { name: "集群高级策略配置" });
+      await expect(drawer).toBeVisible();
+
+      const action = page.locator('[data-ui="qa-action-menu"]');
+      await action
+        .getByRole("button")
+        .evaluate((button: HTMLButtonElement) => button.click());
+
+      const menu = page.getByRole("menu");
+      await expect(menu).toBeVisible();
+      const layers = await page.evaluate(() => ({
+        menu: Number(
+          getComputedStyle(document.querySelector('[role="menu"]')!).zIndex,
+        ),
+        drawer: Number(
+          getComputedStyle(document.querySelector(".sl-drawer-overlay")!)
+            .zIndex,
+        ),
+      }));
+      expect(layers.menu).toBeGreaterThan(layers.drawer);
+    });
+
     test("导航组件支持纯键盘操作", async ({ page }) => {
       await openApp(page, app.url);
       const tabs = page.locator('[data-ui="qa-tabs"]');
