@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.5] - 2026-07-17
+
+### Fixed
+
+- `SecLabActionMenu` 的 Portal 菜单显示在 Drawer、Dialog 和 Modal 之上，避免操作项被模态遮罩遮挡。
+
 ## [0.1.0-alpha.4] - 2026-07-15
 
 ### Added
