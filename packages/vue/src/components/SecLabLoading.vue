@@ -51,6 +51,8 @@ defineProps<Props>();
 <style scoped>
 .sl-loading-host {
   position: relative;
+  width: 100%;
+  min-width: 0;
 }
 
 .sl-loading-host.is-loading {
@@ -104,6 +106,7 @@ defineProps<Props>();
   font-size: var(--sdl-font-body-sm);
   color: var(--sdl-text-primary);
   font-weight: 500;
+  white-space: nowrap;
 }
 
 @keyframes rotate {
