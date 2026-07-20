@@ -1,6 +1,6 @@
 {
   "name": "@seclab-dev/react",
-  "version": "0.1.0-alpha.5",
+  "version": "0.1.0-alpha.6",
   "description": "SecLab React 19 UI Component Library",
   "license": "MIT",
   "type": "module",
