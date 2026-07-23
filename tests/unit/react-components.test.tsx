@@ -15,6 +15,7 @@ import { SecLabLoading } from "../../packages/react/src/components/SecLabLoading
 import { SecLabMenu } from "../../packages/react/src/components/SecLabMenu/SecLabMenu";
 import { SecLabModal } from "../../packages/react/src/components/SecLabModal/SecLabModal";
 import { SecLabSelect } from "../../packages/react/src/components/SecLabSelect/SecLabSelect";
+import { SecLabSelectionBar } from "../../packages/react/src/components/SecLabSelectionBar/SecLabSelectionBar";
 import { SecLabSwitch } from "../../packages/react/src/components/SecLabSwitch/SecLabSwitch";
 import { SecLabTable } from "../../packages/react/src/components/SecLabTable/SecLabTable";
 import { SecLabTabs } from "../../packages/react/src/components/SecLabTabs/SecLabTabs";
@@ -132,6 +133,9 @@ describe("React 公共组件行为", () => {
       <SecLabCheckbox checked={false} indeterminate onChange={vi.fn()} />,
     );
     expect(screen.getByRole("checkbox")).toBePartiallyChecked();
+    expect(screen.getByRole("checkbox").closest("label")).toHaveClass(
+      "is-indeterminate",
+    );
   });
 
   it("Checkbox 将字段标识传递到原生复选框", async () => {
@@ -312,6 +316,101 @@ describe("React 公共组件行为", () => {
     expect(screen.getByText("节点").closest("td")).toHaveStyle({
       left: "80px",
     });
+  });
+
+  it("Table 支持当前页全选、半选和禁用行", async () => {
+    const data = [
+      { id: "row-1", name: "节点一", disabled: false },
+      { id: "row-2", name: "节点二", disabled: false },
+      { id: "row-3", name: "节点三", disabled: true },
+    ];
+    const columns = [
+      {
+        prop: "name",
+        label: "名称",
+        width: 120,
+        fixed: "left" as const,
+      },
+    ];
+    const onSelectedRowKeysChange = vi.fn();
+    const onSelectionChange = vi.fn();
+    const view = render(
+      <SecLabTable
+        data={data}
+        columns={columns}
+        rowKey="id"
+        selectable
+        selectedRowKeys={["other-page", "row-1"]}
+        rowSelectable={(row) => !row.disabled}
+        selectAllLabel="选择当前页全部通知"
+        selectRowLabel={(row) => `选择${row.name}`}
+        onSelectedRowKeysChange={onSelectedRowKeysChange}
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+    const selectAll = screen.getByRole("checkbox", {
+      name: "选择当前页全部通知",
+    });
+    expect(selectAll).toBePartiallyChecked();
+    expect(screen.getByRole("checkbox", { name: "选择节点三" })).toBeDisabled();
+    expect(screen.getByText("节点一").closest("td")).toHaveStyle({
+      left: "48px",
+    });
+
+    await userEvent.click(selectAll);
+    expect(onSelectedRowKeysChange).toHaveBeenLastCalledWith([
+      "other-page",
+      "row-1",
+      "row-2",
+    ]);
+    expect(onSelectionChange).toHaveBeenLastCalledWith([
+      "other-page",
+      "row-1",
+      "row-2",
+    ]);
+
+    view.rerender(
+      <SecLabTable
+        data={data}
+        columns={columns}
+        rowKey="id"
+        selectable
+        selectedRowKeys={["other-page", "row-1", "row-2"]}
+        rowSelectable={(row) => !row.disabled}
+        selectAllLabel="选择当前页全部通知"
+        selectRowLabel={(row) => `选择${row.name}`}
+        onSelectedRowKeysChange={onSelectedRowKeysChange}
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+    await userEvent.click(
+      screen.getByRole("checkbox", { name: "选择当前页全部通知" }),
+    );
+    expect(onSelectedRowKeysChange).toHaveBeenLastCalledWith(["other-page"]);
+  });
+
+  it("SelectionBar 显示结构化计数并支持清除", async () => {
+    const onClear = vi.fn();
+    render(
+      <SecLabSelectionBar
+        count={3}
+        label="已选择"
+        clearLabel="清除选择"
+        ariaLabel="已选择 3 项"
+        onClear={onClear}
+      >
+        <button type="button">归档</button>
+      </SecLabSelectionBar>,
+    );
+    expect(screen.getByText("已选择")).toHaveClass("sl-selection-label");
+    expect(screen.getByText("3")).toHaveClass("sl-selection-count");
+    expect(screen.getByRole("status")).toHaveAttribute(
+      "aria-label",
+      "已选择 3 项",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "清除选择" }));
+    expect(onClear).toHaveBeenCalledOnce();
+    expect(screen.getByRole("button", { name: "归档" })).toBeInTheDocument();
   });
 
   it("Toast 仅由关闭按钮关闭，Loading 暴露 busy 状态", async () => {

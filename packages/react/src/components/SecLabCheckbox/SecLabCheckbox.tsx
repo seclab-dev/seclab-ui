@@ -48,8 +48,8 @@ export const SecLabCheckbox: React.FC<SecLabCheckboxProps> = ({
     <label
       htmlFor={resolvedId}
       className={`sl-checkbox ${checked ? "is-active" : ""} ${
-        disabled ? "is-disabled" : ""
-      } ${className}`.trim()}
+        indeterminate ? "is-indeterminate" : ""
+      } ${disabled ? "is-disabled" : ""} ${className}`.trim()}
       {...rest}
     >
       <span className="sl-checkbox-input">

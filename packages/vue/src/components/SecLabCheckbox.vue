@@ -46,7 +46,11 @@ function toggle() {
   <label
     class="sl-checkbox"
     :for="resolvedId"
-    :class="{ 'is-active': modelValue, 'is-disabled': disabled }"
+    :class="{
+      'is-active': modelValue,
+      'is-indeterminate': indeterminate,
+      'is-disabled': disabled,
+    }"
   >
     <span class="sl-checkbox-input">
       <input
@@ -136,6 +140,20 @@ function toggle() {
   transform-origin: center;
 }
 
+.sl-checkbox-inner::before {
+  box-sizing: border-box;
+  content: "";
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 6px;
+  height: 2px;
+  border-radius: var(--sdl-radius-pill);
+  background-color: var(--sdl-text-inverse);
+  transform: scaleX(0);
+  transition: transform 0.15s ease-in;
+}
+
 .sl-checkbox.is-active .sl-checkbox-inner {
   background-color: var(--sdl-primary);
   border-color: var(--sdl-primary);
@@ -143,6 +161,19 @@ function toggle() {
 
 .sl-checkbox.is-active .sl-checkbox-inner::after {
   transform: rotate(45deg) scaleY(1);
+}
+
+.sl-checkbox.is-indeterminate .sl-checkbox-inner {
+  background-color: var(--sdl-primary);
+  border-color: var(--sdl-primary);
+}
+
+.sl-checkbox.is-indeterminate .sl-checkbox-inner::before {
+  transform: scaleX(1);
+}
+
+.sl-checkbox.is-indeterminate .sl-checkbox-inner::after {
+  transform: rotate(45deg) scaleY(0);
 }
 
 .sl-checkbox:hover:not(.is-disabled) .sl-checkbox-inner {

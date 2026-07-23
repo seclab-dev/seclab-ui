@@ -4,8 +4,8 @@ import * as vueComponents from "../../packages/vue/src";
 import { componentBehaviorMatrix } from "../component-behavior-matrix";
 
 describe("跨框架公共组件契约", () => {
-  it("行为矩阵覆盖全部 26 个组件", () => {
-    expect(Object.keys(componentBehaviorMatrix)).toHaveLength(26);
+  it("行为矩阵覆盖全部 27 个组件", () => {
+    expect(Object.keys(componentBehaviorMatrix)).toHaveLength(27);
   });
 
   it.each(Object.keys(componentBehaviorMatrix))(

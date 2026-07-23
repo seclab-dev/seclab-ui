@@ -53,7 +53,15 @@ export const componentBehaviorMatrix = {
     "form-value",
     "controlled",
   ],
-  SecLabTable: ["render", "row-key", "fixed-columns"],
+  SecLabTable: [
+    "render",
+    "row-key",
+    "fixed-columns",
+    "selection",
+    "select-page",
+    "indeterminate",
+  ],
+  SecLabSelectionBar: ["count", "clear", "actions", "live-region"],
   SecLabDateTimeRangePicker: ["state", "change", "position", "controlled"],
 } as const;
 

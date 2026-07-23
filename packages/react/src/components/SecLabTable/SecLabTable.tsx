@@ -1,4 +1,5 @@
 import React from "react";
+import { SecLabCheckbox } from "../SecLabCheckbox/SecLabCheckbox";
 import "./SecLabTable.css";
 
 export interface SecLabTableColumn<T = any> {
@@ -62,6 +63,22 @@ export interface SecLabTableProps<
     event: React.MouseEvent<HTMLTableRowElement>,
     index: number,
   ) => void;
+  /** 是否显示内置选择列。 */
+  selectable?: boolean;
+  /** 当前选中的稳定行键。 */
+  selectedRowKeys?: React.Key[];
+  /** 更新受控选择状态。 */
+  onSelectedRowKeysChange?: (keys: React.Key[]) => void;
+  /** 选择状态变化回调。 */
+  onSelectionChange?: (keys: React.Key[]) => void;
+  /** 判断一行是否允许选择。 */
+  rowSelectable?: (row: T, index: number) => boolean;
+  /** 全选复选框的无障碍名称。 */
+  selectAllLabel?: string;
+  /** 行复选框的无障碍名称或计算函数。 */
+  selectRowLabel?: string | ((row: T, index: number) => string);
+  /** 选择列宽度。 */
+  selectionColumnWidth?: number;
 }
 
 const formatWidth = (width?: string | number) => {
@@ -96,19 +113,30 @@ export function SecLabTable<T extends Record<string, any>>({
   emptySlot,
   onRowMouseEnter,
   onRowContextMenu,
+  selectable = false,
+  selectedRowKeys = [],
+  onSelectedRowKeysChange,
+  onSelectionChange,
+  rowSelectable,
+  selectAllLabel = "Select all rows on this page",
+  selectRowLabel = "Select row",
+  selectionColumnWidth = 48,
   className = "",
   ...rest
 }: SecLabTableProps<T>) {
   const fixedOffset = (index: number, side: "left" | "right") => {
     const range =
       side === "left" ? columns.slice(0, index) : columns.slice(index + 1);
-    return range
+    const columnOffset = range
       .filter((column) => column.fixed === side)
       .reduce(
         (total, column) =>
           total + (typeof column.width === "number" ? column.width : 0),
         0,
       );
+    return side === "left" && selectable
+      ? columnOffset + selectionColumnWidth
+      : columnOffset;
   };
   const columnStyle = (
     column: SecLabTableColumn<T>,
@@ -130,6 +158,47 @@ export function SecLabTable<T extends Record<string, any>>({
       : rowKey
         ? (row[rowKey] as React.Key)
         : index;
+  const isRowSelectable = (row: T, index: number) =>
+    rowSelectable?.(row, index) ?? true;
+  const resolvedRows = data.map((row, index) => ({
+    row,
+    index,
+    key: resolveRowKey(row, index),
+  }));
+  const selectableRows = resolvedRows.filter(({ row, index }) =>
+    isRowSelectable(row, index),
+  );
+  const selectedKeySet = new Set(selectedRowKeys);
+  const allPageRowsSelected =
+    selectableRows.length > 0 &&
+    selectableRows.every(({ key }) => selectedKeySet.has(key));
+  const somePageRowsSelected =
+    !allPageRowsSelected &&
+    selectableRows.some(({ key }) => selectedKeySet.has(key));
+  const resolveSelectRowLabel = (row: T, index: number) =>
+    typeof selectRowLabel === "function"
+      ? selectRowLabel(row, index)
+      : selectRowLabel;
+  const emitSelection = (keys: React.Key[]) => {
+    onSelectedRowKeysChange?.(keys);
+    onSelectionChange?.(keys);
+  };
+  const updateRowSelection = (row: T, index: number, selected: boolean) => {
+    if (!isRowSelectable(row, index)) return;
+    const next = new Set(selectedRowKeys);
+    const key = resolveRowKey(row, index);
+    if (selected) next.add(key);
+    else next.delete(key);
+    emitSelection([...next]);
+  };
+  const updatePageSelection = (selected: boolean) => {
+    const next = new Set(selectedRowKeys);
+    for (const { key } of selectableRows) {
+      if (selected) next.add(key);
+      else next.delete(key);
+    }
+    emitSelection([...next]);
+  };
   return (
     <div
       className={`sl-table-container ${border ? "sl-table-border" : ""} ${className}`.trim()}
@@ -140,6 +209,28 @@ export function SecLabTable<T extends Record<string, any>>({
         <table className="sl-table">
           <thead>
             <tr className="sl-table-header-row">
+              {selectable && (
+                <th
+                  className="sl-table-header-cell sl-table-selection-cell is-fixed-left"
+                  style={{
+                    width: selectionColumnWidth,
+                    minWidth: selectionColumnWidth,
+                    left: 0,
+                  }}
+                  data-slot="selection-header"
+                >
+                  <div className="sl-cell sl-table-selection-control">
+                    <SecLabCheckbox
+                      checked={allPageRowsSelected}
+                      indeterminate={somePageRowsSelected}
+                      disabled={selectableRows.length === 0}
+                      ariaLabel={selectAllLabel}
+                      data-ui="table-select-all"
+                      onChange={updatePageSelection}
+                    />
+                  </div>
+                </th>
+              )}
               {columns.map((col, index) => {
                 const isFixed = col.fixed ? `is-fixed-${col.fixed}` : "";
                 return (
@@ -167,7 +258,12 @@ export function SecLabTable<T extends Record<string, any>>({
               data.map((row, rowIndex) => (
                 <tr
                   key={resolveRowKey(row, rowIndex)}
-                  className="sl-table-row"
+                  className={`sl-table-row ${
+                    selectable &&
+                    selectedKeySet.has(resolveRowKey(row, rowIndex))
+                      ? "is-selected"
+                      : ""
+                  }`.trim()}
                   onMouseEnter={(event) =>
                     onRowMouseEnter?.(row, event, rowIndex)
                   }
@@ -175,6 +271,31 @@ export function SecLabTable<T extends Record<string, any>>({
                     onRowContextMenu?.(row, event, rowIndex)
                   }
                 >
+                  {selectable && (
+                    <td
+                      className="sl-table-cell sl-table-selection-cell is-fixed-left"
+                      style={{
+                        width: selectionColumnWidth,
+                        minWidth: selectionColumnWidth,
+                        left: 0,
+                      }}
+                      data-slot="selection-cell"
+                    >
+                      <div className="sl-cell sl-table-selection-control">
+                        <SecLabCheckbox
+                          checked={selectedKeySet.has(
+                            resolveRowKey(row, rowIndex),
+                          )}
+                          disabled={!isRowSelectable(row, rowIndex)}
+                          ariaLabel={resolveSelectRowLabel(row, rowIndex)}
+                          data-ui="table-row-selection"
+                          onChange={(selected) =>
+                            updateRowSelection(row, rowIndex, selected)
+                          }
+                        />
+                      </div>
+                    </td>
+                  )}
                   {columns.map((col, colIndex) => {
                     const isFixed = col.fixed ? `is-fixed-${col.fixed}` : "";
                     return (
@@ -203,7 +324,10 @@ export function SecLabTable<T extends Record<string, any>>({
               ))
             ) : (
               <tr>
-                <td colSpan={columns.length} className="sl-table-empty-cell">
+                <td
+                  colSpan={columns.length + (selectable ? 1 : 0)}
+                  className="sl-table-empty-cell"
+                >
                   {emptySlot || (
                     <div className="sl-table-empty">{emptyText}</div>
                   )}

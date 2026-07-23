@@ -50,6 +50,10 @@
   transition: background-color 0.2s;
 }
 
+.sl-table-row.is-selected .sl-table-cell {
+  background-color: var(--sdl-bg-active);
+}
+
 .sl-cell {
   padding: 0 var(--sdl-space-3);
   box-sizing: border-box;
@@ -58,6 +62,20 @@
   white-space: normal;
   word-break: break-all;
   line-height: 23px;
+}
+
+.sl-table-selection-cell {
+  box-sizing: border-box;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sl-table-selection-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
 }
 
 /* 边框模式样式 */

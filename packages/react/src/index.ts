@@ -98,6 +98,9 @@ export type {
   SecLabTableColumn,
 } from "./components/SecLabTable/SecLabTable";
 
+export { SecLabSelectionBar } from "./components/SecLabSelectionBar/SecLabSelectionBar";
+export type { SecLabSelectionBarProps } from "./components/SecLabSelectionBar/SecLabSelectionBar";
+
 export { SecLabDateTimeRangePicker } from "./components/SecLabDateTimeRangePicker/SecLabDateTimeRangePicker";
 export type {
   SecLabDateTimeRangePickerProps,

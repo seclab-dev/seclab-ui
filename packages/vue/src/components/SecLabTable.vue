@@ -5,7 +5,11 @@
  * 支持数据驱动列配置、自定义插槽渲染、固定列以及全网格边框。
  */
 
+import { computed } from "vue";
 import type { CSSProperties } from "vue";
+import SecLabCheckbox from "./SecLabCheckbox.vue";
+
+export type SecLabTableRowKey = string | number;
 
 export interface SecLabTableColumn {
   prop?: string;
@@ -30,18 +34,54 @@ const props = withDefaults(
     /** 无数据时显示的占位文案 */
     emptyText?: string;
     /** 稳定行键字段或计算函数。 */
-    rowKey?: string | ((row: T) => string | number);
+    rowKey?: string | ((row: T) => SecLabTableRowKey);
+    /** 是否显示内置选择列。 */
+    selectable?: boolean;
+    /** 当前选中的稳定行键。 */
+    selectedRowKeys?: SecLabTableRowKey[];
+    /** 判断一行是否允许选择。 */
+    rowSelectable?: (row: T, index: number) => boolean;
+    /** 全选复选框的无障碍名称。 */
+    selectAllLabel?: string;
+    /** 行复选框的无障碍名称或计算函数。 */
+    selectRowLabel?: string | ((row: T, index: number) => string);
+    /** 选择列宽度。 */
+    selectionColumnWidth?: number;
   }>(),
   {
     border: false,
     emptyText: "暂无数据",
+    selectable: false,
+    selectedRowKeys: () => [],
+    selectAllLabel: "Select all rows on this page",
+    selectRowLabel: "Select row",
+    selectionColumnWidth: 48,
   },
 );
 
 const emit = defineEmits<{
   rowMouseenter: [row: T, event: MouseEvent, index: number];
   rowContextmenu: [row: T, event: MouseEvent, index: number];
+  "update:selectedRowKeys": [keys: SecLabTableRowKey[]];
+  selectionChange: [keys: SecLabTableRowKey[]];
 }>();
+
+const selectedKeySet = computed(() => new Set(props.selectedRowKeys));
+const selectableRows = computed(() =>
+  props.data
+    .map((row, index) => ({ row, index, key: resolveRowKey(row, index) }))
+    .filter(({ row, index }) => isRowSelectable(row, index)),
+);
+const allPageRowsSelected = computed(
+  () =>
+    selectableRows.value.length > 0 &&
+    selectableRows.value.every(({ key }) => selectedKeySet.value.has(key)),
+);
+const somePageRowsSelected = computed(
+  () =>
+    !allPageRowsSelected.value &&
+    selectableRows.value.some(({ key }) => selectedKeySet.value.has(key)),
+);
 
 /**
  * 格式化宽度数值
@@ -77,13 +117,16 @@ function fixedOffset(index: number, side: "left" | "right") {
     side === "left"
       ? props.columns.slice(0, index)
       : props.columns.slice(index + 1);
-  return range
+  const columnOffset = range
     .filter((column) => column.fixed === side)
     .reduce(
       (total, column) =>
         total + (typeof column.width === "number" ? column.width : 0),
       0,
     );
+  return side === "left" && props.selectable
+    ? columnOffset + props.selectionColumnWidth
+    : columnOffset;
 }
 function getColumnStyle(
   col: SecLabTableColumn,
@@ -104,6 +147,44 @@ function resolveRowKey(row: T, index: number) {
   if (props.rowKey) return row[props.rowKey];
   return index;
 }
+
+/** 判断指定行是否允许选择。 */
+function isRowSelectable(row: T, index: number) {
+  return props.rowSelectable?.(row, index) ?? true;
+}
+
+/** 生成行选择控件的无障碍名称。 */
+function resolveSelectRowLabel(row: T, index: number) {
+  return typeof props.selectRowLabel === "function"
+    ? props.selectRowLabel(row, index)
+    : props.selectRowLabel;
+}
+
+/** 发出受控选择状态更新。 */
+function updateSelection(keys: SecLabTableRowKey[]) {
+  emit("update:selectedRowKeys", keys);
+  emit("selectionChange", keys);
+}
+
+/** 更新单行选择状态。 */
+function updateRowSelection(row: T, index: number, selected: boolean) {
+  if (!isRowSelectable(row, index)) return;
+  const key = resolveRowKey(row, index);
+  const next = new Set(props.selectedRowKeys);
+  if (selected) next.add(key);
+  else next.delete(key);
+  updateSelection([...next]);
+}
+
+/** 选择或取消选择当前页全部可选行，同时保留其他页面的选择。 */
+function updatePageSelection(selected: boolean) {
+  const next = new Set(props.selectedRowKeys);
+  for (const { key } of selectableRows.value) {
+    if (selected) next.add(key);
+    else next.delete(key);
+  }
+  updateSelection([...next]);
+}
 </script>
 
 <template>
@@ -116,6 +197,27 @@ function resolveRowKey(row: T, index: number) {
       <table class="sl-table">
         <thead>
           <tr class="sl-table-header-row">
+            <th
+              v-if="selectable"
+              class="sl-table-header-cell sl-table-selection-cell is-fixed-left"
+              :style="{
+                width: `${selectionColumnWidth}px`,
+                minWidth: `${selectionColumnWidth}px`,
+                left: '0',
+              }"
+              data-slot="selection-header"
+            >
+              <div class="sl-cell sl-table-selection-control">
+                <SecLabCheckbox
+                  :model-value="allPageRowsSelected"
+                  :indeterminate="somePageRowsSelected"
+                  :disabled="selectableRows.length === 0"
+                  :aria-label="selectAllLabel"
+                  data-ui="table-select-all"
+                  @change="updatePageSelection"
+                />
+              </div>
+            </th>
             <th
               v-for="(col, index) in columns"
               :key="index"
@@ -143,6 +245,11 @@ function resolveRowKey(row: T, index: number) {
               v-for="(row, rowIndex) in data"
               :key="resolveRowKey(row, rowIndex)"
               class="sl-table-row"
+              :class="{
+                'is-selected':
+                  selectable &&
+                  selectedKeySet.has(resolveRowKey(row, rowIndex)),
+              }"
               @mouseenter="
                 (event) => emit('rowMouseenter', row, event, rowIndex)
               "
@@ -150,6 +257,30 @@ function resolveRowKey(row: T, index: number) {
                 (event) => emit('rowContextmenu', row, event, rowIndex)
               "
             >
+              <td
+                v-if="selectable"
+                class="sl-table-cell sl-table-selection-cell is-fixed-left"
+                :style="{
+                  width: `${selectionColumnWidth}px`,
+                  minWidth: `${selectionColumnWidth}px`,
+                  left: '0',
+                }"
+                data-slot="selection-cell"
+              >
+                <div class="sl-cell sl-table-selection-control">
+                  <SecLabCheckbox
+                    :model-value="
+                      selectedKeySet.has(resolveRowKey(row, rowIndex))
+                    "
+                    :disabled="!isRowSelectable(row, rowIndex)"
+                    :aria-label="resolveSelectRowLabel(row, rowIndex)"
+                    data-ui="table-row-selection"
+                    @change="
+                      (selected) => updateRowSelection(row, rowIndex, selected)
+                    "
+                  />
+                </div>
+              </td>
               <td
                 v-for="(col, colIndex) in columns"
                 :key="colIndex"
@@ -174,7 +305,10 @@ function resolveRowKey(row: T, index: number) {
           </template>
           <!-- 空状态 -->
           <tr v-else>
-            <td :colspan="columns.length" class="sl-table-empty-cell">
+            <td
+              :colspan="columns.length + (selectable ? 1 : 0)"
+              class="sl-table-empty-cell"
+            >
               <slot name="empty">
                 <div class="sl-table-empty">{{ emptyText }}</div>
               </slot>
@@ -239,6 +373,10 @@ function resolveRowKey(row: T, index: number) {
   transition: background-color 0.2s;
 }
 
+.sl-table-row.is-selected .sl-table-cell {
+  background-color: var(--sdl-bg-active);
+}
+
 .sl-cell {
   padding: 0 var(--sdl-space-3);
   box-sizing: border-box;
@@ -247,6 +385,20 @@ function resolveRowKey(row: T, index: number) {
   white-space: normal;
   word-break: break-all;
   line-height: 23px;
+}
+
+.sl-table-selection-cell {
+  box-sizing: border-box;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sl-table-selection-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
 }
 
 /* 边框模式样式 */

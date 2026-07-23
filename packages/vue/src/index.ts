@@ -23,10 +23,14 @@ import SecLabModal from "./components/SecLabModal.vue";
 import SecLabPagination from "./components/SecLabPagination.vue";
 import SecLabSelect from "./components/SecLabSelect.vue";
 import SecLabTable from "./components/SecLabTable.vue";
+import SecLabSelectionBar from "./components/SecLabSelectionBar.vue";
 import SecLabDateTimeRangePicker from "./components/SecLabDateTimeRangePicker.vue";
 
 export type { ToastItem } from "./components/SecLabToast.vue";
-export type { SecLabTableColumn } from "./components/SecLabTable.vue";
+export type {
+  SecLabTableColumn,
+  SecLabTableRowKey,
+} from "./components/SecLabTable.vue";
 export type { DateTimeRangeValue } from "./components/SecLabDateTimeRangePicker.vue";
 
 export {
@@ -55,5 +59,6 @@ export {
   SecLabPagination,
   SecLabSelect,
   SecLabTable,
+  SecLabSelectionBar,
   SecLabDateTimeRangePicker,
 };

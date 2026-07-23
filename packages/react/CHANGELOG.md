@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- `SecLabTable` 增加受控行选择、当前页全选、半选和禁用行能力。
+- 新增 `SecLabSelectionBar`，统一批量选择数量、清除入口和操作布局。
+
+### Fixed
+
+- `SecLabCheckbox` 在不确定状态下显示明确的半选图形。
+
 ## [0.1.0-alpha.6] - 2026-07-20
 
 ### Fixed

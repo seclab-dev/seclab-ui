@@ -7,6 +7,7 @@ import SecLabLoading from "../../packages/vue/src/components/SecLabLoading.vue";
 import SecLabMenu from "../../packages/vue/src/components/SecLabMenu.vue";
 import SecLabModal from "../../packages/vue/src/components/SecLabModal.vue";
 import SecLabSelect from "../../packages/vue/src/components/SecLabSelect.vue";
+import SecLabSelectionBar from "../../packages/vue/src/components/SecLabSelectionBar.vue";
 import SecLabSwitch from "../../packages/vue/src/components/SecLabSwitch.vue";
 import SecLabTable from "../../packages/vue/src/components/SecLabTable.vue";
 import SecLabTabs from "../../packages/vue/src/components/SecLabTabs.vue";
@@ -100,6 +101,7 @@ describe("Vue 公共组件行为", () => {
     await checkbox.vm.$nextTick();
     expect(checkbox.get("input").element.indeterminate).toBe(true);
     expect(checkbox.get("input").attributes("aria-checked")).toBe("mixed");
+    expect(checkbox.classes()).toContain("is-indeterminate");
   });
 
   it("Checkbox 将字段标识传递到原生复选框", async () => {
@@ -269,6 +271,69 @@ describe("Vue 公共组件行为", () => {
     });
     const cells = wrapper.findAll("tbody td");
     expect(cells[1].attributes("style")).toContain("left: 80px");
+  });
+
+  it("Table 支持当前页全选、半选和禁用行", async () => {
+    const wrapper = mount(SecLabTable, {
+      props: {
+        data: [
+          { id: "row-1", name: "节点一", disabled: false },
+          { id: "row-2", name: "节点二", disabled: false },
+          { id: "row-3", name: "节点三", disabled: true },
+        ],
+        rowKey: "id",
+        columns: [{ prop: "name", label: "名称", fixed: "left", width: 120 }],
+        selectable: true,
+        selectedRowKeys: ["other-page", "row-1"],
+        rowSelectable: (row: { disabled: boolean }) => !row.disabled,
+        selectAllLabel: "选择当前页全部通知",
+        selectRowLabel: (row: { name: string }) => `选择${row.name}`,
+      },
+    });
+    await wrapper.vm.$nextTick();
+    const checkboxes = wrapper.findAll('input[type="checkbox"]');
+    expect(checkboxes).toHaveLength(4);
+    expect(checkboxes[0].element.indeterminate).toBe(true);
+    expect(checkboxes[0].attributes("aria-label")).toBe("选择当前页全部通知");
+    expect(checkboxes[3].attributes("disabled")).toBeDefined();
+    expect(wrapper.findAll("tbody td")[1].attributes("style")).toContain(
+      "left: 48px",
+    );
+
+    await checkboxes[0].setValue(true);
+    expect(wrapper.emitted("update:selectedRowKeys")?.at(-1)).toEqual([
+      ["other-page", "row-1", "row-2"],
+    ]);
+    expect(wrapper.emitted("selectionChange")?.at(-1)).toEqual([
+      ["other-page", "row-1", "row-2"],
+    ]);
+
+    await wrapper.setProps({
+      selectedRowKeys: ["other-page", "row-1", "row-2"],
+    });
+    await wrapper.find('[data-ui="table-select-all"] input').setValue(false);
+    expect(wrapper.emitted("update:selectedRowKeys")?.at(-1)).toEqual([
+      ["other-page"],
+    ]);
+  });
+
+  it("SelectionBar 显示结构化计数并支持清除", async () => {
+    const wrapper = mount(SecLabSelectionBar, {
+      props: {
+        count: 3,
+        label: "已选择",
+        clearLabel: "清除选择",
+        ariaLabel: "已选择 3 项",
+      },
+      slots: { default: "<button>归档</button>" },
+    });
+    expect(wrapper.get(".sl-selection-label").text()).toBe("已选择");
+    expect(wrapper.get(".sl-selection-count").text()).toBe("3");
+    expect(wrapper.get('[role="status"]').attributes("aria-label")).toBe(
+      "已选择 3 项",
+    );
+    await wrapper.get('[data-ui="clear-selection"]').trigger("click");
+    expect(wrapper.emitted("clear")).toHaveLength(1);
   });
 
   it("Toast 仅由关闭按钮关闭，Loading 暴露 busy 状态", async () => {
