@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.7] - 2026-07-23
+
 ### Added
 
 - `SecLabTable` 增加受控行选择、当前页全选、半选和禁用行能力。
