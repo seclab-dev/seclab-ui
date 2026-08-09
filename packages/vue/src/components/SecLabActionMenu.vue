@@ -37,10 +37,12 @@ const props = withDefaults(
 );
 
 const showMenu = ref(false);
+const dropdownPositioned = ref(false);
 const menuRef = ref<HTMLElement | null>(null);
 const dropdownRef = ref<HTMLElement | null>(null);
 const dropdownStyle = ref<Record<string, string>>({});
 const dropdownPlacement = ref<"top" | "bottom">("bottom");
+const ACTION_MENU_OPEN_EVENT = "seclab-action-menu-open";
 
 const updateDropdownPosition = () => {
   if (!menuRef.value || !dropdownRef.value || !showMenu.value) return;
@@ -50,20 +52,36 @@ const updateDropdownPosition = () => {
   });
   dropdownPlacement.value = position.placement;
   dropdownStyle.value = position.style;
+  dropdownPositioned.value = true;
+};
+
+const closeMenu = () => {
+  showMenu.value = false;
+  dropdownPositioned.value = false;
+};
+
+const openMenu = (focusFirst = false) => {
+  dropdownPositioned.value = false;
+  showMenu.value = true;
+  document.dispatchEvent(
+    new CustomEvent(ACTION_MENU_OPEN_EVENT, { detail: menuRef.value }),
+  );
+  nextTick(() => {
+    updateDropdownPosition();
+    if (focusFirst) focusItem(0);
+  });
 };
 
 const toggleMenu = () => {
   if (props.disabled) return;
-  showMenu.value = !showMenu.value;
-  if (showMenu.value) {
-    nextTick(updateDropdownPosition);
-  }
+  if (showMenu.value) closeMenu();
+  else openMenu();
 };
 
 const handleActionClick = (action: Action) => {
   if (action.disabled) return;
   action.handler();
-  showMenu.value = false;
+  closeMenu();
 };
 const focusItem = (index: number) => {
   const items = [
@@ -76,11 +94,7 @@ const focusItem = (index: number) => {
 const handleTriggerKeydown = (event: KeyboardEvent) => {
   if (!["Enter", " ", "ArrowDown"].includes(event.key)) return;
   event.preventDefault();
-  showMenu.value = true;
-  nextTick(() => {
-    updateDropdownPosition();
-    focusItem(0);
-  });
+  openMenu(true);
 };
 const handleMenuKeydown = (event: KeyboardEvent) => {
   const items = [
@@ -97,7 +111,7 @@ const handleMenuKeydown = (event: KeyboardEvent) => {
     focusItem(event.key === "Home" ? 0 : items.length - 1);
   } else if (event.key === "Escape") {
     event.preventDefault();
-    showMenu.value = false;
+    closeMenu();
     menuRef.value?.querySelector<HTMLButtonElement>(".sl-action-btn")?.focus();
   }
 };
@@ -109,18 +123,26 @@ const handleClickOutside = (event: MouseEvent) => {
     !menuRef.value.contains(target) &&
     (!dropdownRef.value || !dropdownRef.value.contains(target))
   ) {
-    showMenu.value = false;
+    closeMenu();
+  }
+};
+
+const handleOtherMenuOpen = (event: Event) => {
+  if ((event as CustomEvent<HTMLElement | null>).detail !== menuRef.value) {
+    closeMenu();
   }
 };
 
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
+  document.addEventListener(ACTION_MENU_OPEN_EVENT, handleOtherMenuOpen);
   window.addEventListener("resize", updateDropdownPosition);
   window.addEventListener("scroll", updateDropdownPosition, true);
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleClickOutside);
+  document.removeEventListener(ACTION_MENU_OPEN_EVENT, handleOtherMenuOpen);
   window.removeEventListener("resize", updateDropdownPosition);
   window.removeEventListener("scroll", updateDropdownPosition, true);
 });
@@ -146,6 +168,7 @@ onBeforeUnmount(() => {
           v-if="showMenu"
           ref="dropdownRef"
           class="sl-dropdown"
+          :class="{ 'is-positioned': dropdownPositioned }"
           role="menu"
           :style="dropdownStyle"
           :data-placement="dropdownPlacement"
@@ -230,6 +253,13 @@ onBeforeUnmount(() => {
   padding: var(--sdl-space-1);
   max-height: 260px;
   overflow-y: auto;
+}
+
+.sl-dropdown:not(.is-positioned) {
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .sl-dropdown-tooltip-wrapper {

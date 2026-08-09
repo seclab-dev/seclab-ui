@@ -48,6 +48,13 @@
   overflow-y: auto;
 }
 
+.sl-dropdown:not(.is-positioned) {
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .sl-dropdown-tooltip-wrapper {
   display: block;
   width: 100%;

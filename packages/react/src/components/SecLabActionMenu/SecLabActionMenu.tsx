@@ -5,6 +5,8 @@ import { SecLabTooltip } from "../SecLabTooltip/SecLabTooltip";
 import "./SecLabActionMenu.css";
 import { computeFloatingPosition } from "../../internal/floating-position";
 
+const ACTION_MENU_OPEN_EVENT = "seclab-action-menu-open";
+
 export interface SecLabAction {
   label: string;
   className?: string;
@@ -34,6 +36,7 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
   ...rest
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [dropdownPositioned, setDropdownPositioned] = useState(false);
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const [dropdownPlacement, setDropdownPlacement] = useState<"top" | "bottom">(
     "bottom",
@@ -49,6 +52,7 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
     });
     setDropdownPlacement(position.placement);
     setDropdownStyle(position.style);
+    setDropdownPositioned(true);
   }, [showMenu]);
 
   useEffect(() => {
@@ -66,15 +70,26 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
         (!dropdownRef.current || !dropdownRef.current.contains(target))
       ) {
         setShowMenu(false);
+        setDropdownPositioned(false);
+      }
+    };
+    const handleOtherMenuOpen = (event: Event) => {
+      if (
+        (event as CustomEvent<HTMLElement | null>).detail !== menuRef.current
+      ) {
+        setShowMenu(false);
+        setDropdownPositioned(false);
       }
     };
 
     document.addEventListener("click", handleClickOutside);
+    document.addEventListener(ACTION_MENU_OPEN_EVENT, handleOtherMenuOpen);
     window.addEventListener("resize", updateDropdownPosition);
     window.addEventListener("scroll", updateDropdownPosition, true);
 
     return () => {
       document.removeEventListener("click", handleClickOutside);
+      document.removeEventListener(ACTION_MENU_OPEN_EVENT, handleOtherMenuOpen);
       window.removeEventListener("resize", updateDropdownPosition);
       window.removeEventListener("scroll", updateDropdownPosition, true);
     };
@@ -83,7 +98,16 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
   const toggleMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     if (disabled) return;
-    setShowMenu((prev) => !prev);
+    if (showMenu) {
+      setShowMenu(false);
+      setDropdownPositioned(false);
+      return;
+    }
+    setDropdownPositioned(false);
+    setShowMenu(true);
+    document.dispatchEvent(
+      new CustomEvent(ACTION_MENU_OPEN_EVENT, { detail: menuRef.current }),
+    );
   };
 
   const handleActionClick = (
@@ -94,6 +118,7 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
     if (action.disabled) return;
     action.handler();
     setShowMenu(false);
+    setDropdownPositioned(false);
   };
   const focusItem = (index: number) => {
     const items = [
@@ -108,7 +133,11 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
   ) => {
     if (!["Enter", " ", "ArrowDown"].includes(event.key)) return;
     event.preventDefault();
+    setDropdownPositioned(false);
     setShowMenu(true);
+    document.dispatchEvent(
+      new CustomEvent(ACTION_MENU_OPEN_EVENT, { detail: menuRef.current }),
+    );
     requestAnimationFrame(() => {
       updateDropdownPosition();
       focusItem(0);
@@ -130,6 +159,7 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
     } else if (event.key === "Escape") {
       event.preventDefault();
       setShowMenu(false);
+      setDropdownPositioned(false);
       menuRef.current
         ?.querySelector<HTMLButtonElement>(".sl-action-btn")
         ?.focus();
@@ -159,7 +189,7 @@ export const SecLabActionMenu: React.FC<SecLabActionMenuProps> = ({
         createPortal(
           <div
             ref={dropdownRef}
-            className="sl-dropdown"
+            className={`sl-dropdown ${dropdownPositioned ? "is-positioned" : ""}`.trim()}
             role="menu"
             style={dropdownStyle}
             data-placement={dropdownPlacement}

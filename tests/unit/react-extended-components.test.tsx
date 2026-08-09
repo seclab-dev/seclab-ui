@@ -39,6 +39,31 @@ describe("React 扩展组件行为", () => {
     expect(handler).toHaveBeenCalledOnce();
   });
 
+  it("ActionMenu 同一时刻只展开一个并在定位后显示", () => {
+    render(
+      <>
+        <SecLabActionMenu
+          label="操作一"
+          actions={[{ label: "执行一", handler: vi.fn() }]}
+        />
+        <SecLabActionMenu
+          label="操作二"
+          actions={[{ label: "执行二", handler: vi.fn() }]}
+        />
+      </>,
+    );
+
+    const first = screen.getByRole("button", { name: "操作一" });
+    const second = screen.getByRole("button", { name: "操作二" });
+    fireEvent.click(first);
+    expect(screen.getByRole("menu")).toHaveClass("is-positioned");
+    fireEvent.click(second);
+
+    expect(screen.getAllByRole("menu")).toHaveLength(1);
+    expect(first).toHaveAttribute("aria-expanded", "false");
+    expect(second).toHaveAttribute("aria-expanded", "true");
+  });
+
   it("Tooltip 渲染提示语义", async () => {
     render(
       <SecLabTooltip text="帮助" delay={0}>

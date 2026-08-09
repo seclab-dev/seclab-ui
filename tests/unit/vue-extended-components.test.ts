@@ -37,6 +37,37 @@ describe("Vue 扩展组件行为", () => {
     expect(handler).toHaveBeenCalledOnce();
   });
 
+  it("ActionMenu 同一时刻只展开一个并在定位后显示", async () => {
+    const first = mount(SecLabActionMenu, {
+      attachTo: document.body,
+      props: {
+        label: "操作一",
+        actions: [{ label: "执行一", handler: vi.fn() }],
+      },
+    });
+    const second = mount(SecLabActionMenu, {
+      attachTo: document.body,
+      props: {
+        label: "操作二",
+        actions: [{ label: "执行二", handler: vi.fn() }],
+      },
+    });
+
+    await first.get(".sl-action-btn").trigger("click");
+    expect(document.querySelector(".sl-dropdown")?.classList).toContain(
+      "is-positioned",
+    );
+    await second.get(".sl-action-btn").trigger("click");
+
+    expect(document.querySelectorAll('[role="menu"]')).toHaveLength(1);
+    expect(first.get(".sl-action-btn").attributes("aria-expanded")).toBe(
+      "false",
+    );
+    expect(second.get(".sl-action-btn").attributes("aria-expanded")).toBe(
+      "true",
+    );
+  });
+
   it("Tooltip 渲染提示语义", async () => {
     const wrapper = mount(SecLabTooltip, {
       attachTo: document.body,
