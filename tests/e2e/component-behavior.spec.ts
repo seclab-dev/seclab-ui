@@ -78,6 +78,41 @@ for (const app of apps)
       expect(layers.menu).toBeGreaterThan(layers.drawer);
     });
 
+    test("Loading cover 覆盖父容器内的高层级内容", async ({ page }) => {
+      await openApp(page, app.url);
+      const fixture = page.locator('[data-ui="qa-loading-cover"]');
+      await fixture.scrollIntoViewIfNeeded();
+
+      const layers = await fixture.evaluate((container) => {
+        const loadingHost = container.querySelector<HTMLElement>(
+          ".sl-loading-host.is-cover.is-loading",
+        )!;
+        const stickyContent = container.querySelector<HTMLElement>(
+          '[data-slot="sticky-content"]',
+        )!;
+        const stickyRect = stickyContent.getBoundingClientRect();
+        const topElement = document.elementFromPoint(
+          stickyRect.left + stickyRect.width / 2,
+          stickyRect.top + stickyRect.height / 2,
+        );
+
+        return {
+          loading: Number(getComputedStyle(loadingHost).zIndex),
+          sticky: Number(getComputedStyle(stickyContent).zIndex),
+          modal: Number(
+            getComputedStyle(document.documentElement).getPropertyValue(
+              "--sdl-z-index-modal",
+            ),
+          ),
+          maskIsTopmost: topElement?.closest(".sl-loading-mask") !== null,
+        };
+      });
+
+      expect(layers.loading).toBeGreaterThan(layers.sticky);
+      expect(layers.loading).toBeLessThan(layers.modal);
+      expect(layers.maskIsTopmost).toBe(true);
+    });
+
     test("导航组件支持纯键盘操作", async ({ page }) => {
       await openApp(page, app.url);
       const tabs = page.locator('[data-ui="qa-tabs"]');

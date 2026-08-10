@@ -485,6 +485,37 @@ function App() {
                 </div>
               </SecLabLoading>
             </SecLabCard>
+
+            <SecLabCard style={{ width: "320px" }} header="覆盖层级回归">
+              <div
+                data-ui="qa-loading-cover"
+                style={{
+                  position: "relative",
+                  height: "96px",
+                  overflow: "hidden",
+                  border: "1px solid var(--sdl-border-default)",
+                  borderRadius: "var(--sdl-radius-md)",
+                  background: "var(--sdl-bg-muted)",
+                }}
+              >
+                <div
+                  data-slot="sticky-content"
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 30,
+                    height: "40px",
+                    display: "grid",
+                    placeItems: "center",
+                    color: "var(--sdl-text-primary)",
+                    background: "var(--sdl-bg-panel)",
+                  }}
+                >
+                  高层级粘性内容
+                </div>
+                <SecLabLoading loading cover text="正在加载..." />
+              </div>
+            </SecLabCard>
           </div>
         </section>
 

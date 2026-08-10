@@ -68,6 +68,7 @@ defineProps<Props>();
 
 .sl-loading-host.is-cover.is-loading {
   pointer-events: auto;
+  z-index: var(--sdl-z-index-window);
 }
 
 .sl-loading-mask {
